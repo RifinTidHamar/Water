@@ -1,0 +1,72 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel textureDraw
+#pragma kernel emberMov
+#include "noiseSimplex.cginc"
+
+struct emberPos
+{
+    int2 pos;
+    int2 vel;
+    float life;
+    float lifeSave;
+};
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+        //p -= 0.5;
+    return p;
+}
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> embers;
+RWTexture2D<float4> embersDoub;
+RWStructuredBuffer<emberPos> emberObj;
+
+float dt;
+
+int emberCount;
+
+[numthreads(1, 1, 1)]
+void emberMov(uint3 id : SV_DispatchThreadID)
+{
+    float2 startNoise = float2(id.x, dt * 2);
+    float noise = snoise(startNoise);
+    emberObj[id.x].pos += int2(round(noise * 2), 1);
+    emberObj[id.x].life -= 0.01;
+
+    if (emberObj[id.x].life >= 0)
+    {
+        embers[emberObj[id.x].pos] = float4(0.87, 0.19, 0.01, 1);
+    }
+    else
+    {
+        emberObj[id.x].pos.x = (int)(hash11(emberObj[id.x].pos.x) * 135 * 0.3333) + 135 / 3;
+        emberObj[id.x].pos.y = (int)(hash11(emberObj[id.x].pos.y) * 112 * 0.3333) + 112 / 3;
+        emberObj[id.x].life = emberObj[id.x].lifeSave;
+    }
+}
+
+[numthreads(15, 14, 1)]
+void textureDraw(uint3 id : SV_DispatchThreadID)
+{
+    embers[uint2(id.x, id.y)] -= 1;
+
+    /*for (int i = 0; i < emberCount; i++)
+    {
+        if (emberObj[i].life >= 0)
+        {
+            embers[emberObj[i].pos] = float4(0.87, 0.19, 0.01, 1);
+        }
+        else
+        {
+            emberObj[i].pos.x = (int) (hash11(emberObj[i].pos.x) * 135 * 0.3333) + 135 / 3;
+            emberObj[i].pos.y = (int) (hash11(emberObj[i].pos.y) * 112 * 0.3333) + 112 / 3;
+            emberObj[i].life = emberObj[i].lifeSave;
+        }
+    }*/
+}
+

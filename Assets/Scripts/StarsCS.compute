@@ -1,0 +1,74 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel textureDraw
+#pragma kernel starMov
+struct starPos
+{
+    int2 pos;
+    int2 vel;
+    float life;
+    float lifeSave;
+};
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+        //p -= 0.5;
+    return p;
+}
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> stars;
+//RWTexture2D<float4> starsDoub;
+Texture2D<float4> mask;
+RWStructuredBuffer<starPos> starObj;
+
+int starCount;
+
+[numthreads(1, 1, 1)]
+void starMov(uint3 id : SV_DispatchThreadID)
+{
+    int starSegmentLength = 2;
+    starObj[id.x].pos += starObj[id.x].vel * starSegmentLength;
+    starObj[id.x].life -= 0.01;
+
+    if (starObj[id.x].life > 0)
+    {
+        for (int i = 0; i < starSegmentLength; i++)
+        {
+            stars[starObj[id.x].pos + (starObj[id.x].vel * i)].xyzw = float4(1, 1, 1, 1);// *mask[starObj[i].pos];
+        }
+        /*stars[starObj[id.x].pos + starObj[id.x].vel].xyzw = float4(1, 1, 1, 1);
+        stars[starObj[id.x].pos + (starObj[id.x].vel*2)].xyzw = float4(1, 1, 1, 1);*/
+
+    }
+    else
+    {
+        starObj[id.x].pos.x = (int)(hash11(starObj[id.x].pos.x) * 135);
+        starObj[id.x].pos.y = (int)(hash11(starObj[id.x].pos.y) * 112);
+        starObj[id.x].life = starObj[id.x].lifeSave;
+    }
+}
+
+[numthreads(15, 14, 1)]
+void textureDraw(uint3 id : SV_DispatchThreadID)
+{
+    stars[uint2(id.x, id.y)] -= 0.07;
+
+    //for (int i = 0; i < starCount; i++)
+    //{
+    //    if (starObj[i].life > 0)
+    //    {
+    //        stars[starObj[i].pos].xyzw = float4(1, 1, 1, 1);// *mask[starObj[i].pos];
+    //    }
+    //    else
+    //    {
+    //        starObj[i].pos.x = (int) (hash11(starObj[i].pos.x) * 135);
+    //        starObj[i].pos.y = (int) (hash11(starObj[i].pos.y) * 112);
+    //        starObj[i].life = starObj[i].lifeSave;
+    //    }
+    //}
+}
+
