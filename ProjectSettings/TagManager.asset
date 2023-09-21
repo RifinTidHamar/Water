@@ -9,6 +9,7 @@ TagManager:
   - spawn
   - trail
   - trailTexts
+  - tree
   layers:
   - Default
   - TransparentFX

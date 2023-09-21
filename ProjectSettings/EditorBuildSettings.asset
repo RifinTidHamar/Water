@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Crack.unity
     guid: 3a2354546382fe149b83adbd2090c3ca
   - enabled: 1
-    path: Assets/Dialogue System Examples/Rifin Example/Rifin.unity
+    path: Assets/Scenes/Rifin.unity
     guid: ff8c4435a5e64c5419efc3f4a0764f45
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2f592624c4ded6141b0d03fe234e3ec2, type: 2}

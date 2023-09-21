@@ -33,6 +33,5 @@ public class unhideTrail : MonoBehaviour
         }
 
         //trailText.SetActive(true);
-        textScrollBar.value = 1;
     }
 }

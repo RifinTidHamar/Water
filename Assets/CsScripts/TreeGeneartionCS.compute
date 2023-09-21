@@ -1,0 +1,162 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel barkDraw
+#pragma kernel leafDraw
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+
+static int2 texResolution = int2(135, 135);
+static float eps = 0;
+#include "noiseSimplex.cginc"
+
+struct trilygon
+{
+    float2 t;
+    float2 r;
+    float2 l;
+};
+
+struct polygon
+{
+    float2 tl;
+    float2 tr;
+    float2 br;
+    float2 bl;
+};
+
+struct tree
+{
+    polygon bark1;
+    polygon bark2;
+    polygon bark3;
+    trilygon leavesLeft;
+    //trilygon leavesRight;
+};
+
+struct leaf
+{
+    trilygon rootTri;
+    trilygon topTri;
+};
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+    //p -= 0.5;
+    return p;
+}
+
+RWTexture2D<float4> treeText;
+StructuredBuffer<tree> treeObj;
+StructuredBuffer<leaf> leafObjs;
+
+int inPolygon(float2 p, polygon poly)
+{
+    int belowTop = step(p.y, poly.tl.y);
+    int aboveBottom = step(poly.bl.y, p.y);
+    float leftLineSlope = (poly.tl.y - poly.bl.y) / (poly.tl.x - poly.bl.x);
+    float leftLineYIntercept = poly.tl.y - leftLineSlope * poly.tl.x;
+    float xOfLineLeft = (p.y - leftLineYIntercept) / leftLineSlope;
+
+    float rightLineSlope = (poly.tr.y - poly.br.y) / (poly.tr.x - poly.br.x);
+    float rightLineYIntercept = poly.tr.y - rightLineSlope * poly.tr.x;
+    float xOfLineRight = (p.y - rightLineYIntercept) / rightLineSlope;
+
+    int rightOfLeftLine = step(xOfLineLeft, p.x);
+    int leftOfRightLine = step(p.x, xOfLineRight);
+
+    return belowTop * aboveBottom *rightOfLeftLine* leftOfRightLine;
+}
+
+float inTriangle(float2 curUV, trilygon tri)
+{
+    float2 p1 = tri.t;
+    float2 p2 = tri.r;
+    float2 p3 = tri.l;
+    float a;
+    float b;
+    float c;
+    int inTri = 0;
+
+    a = ((p2.y - p3.y) * (curUV.x - p3.x) + (p3.x - p2.x) * (curUV.y - p3.y)) / ((p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y));
+    b = ((p3.y - p1.y) * (curUV.x - p3.x) + (p1.x - p3.x) * (curUV.y - p3.y)) / ((p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y));
+    c = 1 - a - b;
+    if (0 - eps <= a && a <= 1 + eps && 0 - eps <= b && b <= 1 + eps && 0 - eps <= c && c <= 1 + eps)
+    {
+        inTri = 1;
+    }
+    return inTri;
+}
+
+//x: texture x dimension
+//y: texture y dimension
+//z: always 1
+[numthreads(15, 15, 1)]
+void barkDraw(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = float2((float2)id.xy / (float)texResolution.x);
+    float inPoly = inPolygon(pos, treeObj[0].bark1);
+    inPoly += inPolygon(pos, treeObj[0].bark2);
+    inPoly += inPolygon(pos, treeObj[0].bark3);
+    float solidInPoly = inPoly;
+    float noiseOfset = hash11(treeObj[0].bark1.bl) * 1000;
+    //bark color noise
+    inPoly -= inPoly * round(snoise(pos * float2(25, 5) + noiseOfset) * 0.5 + 0.7) * 0.2;
+    float inTri = inTriangle(pos, treeObj[0].leavesLeft);
+    //inTri += inTriangle(pos, treeObj[0].leavesRight);
+
+    float2 midPoint = (treeObj[0].leavesLeft.r + treeObj[0].leavesLeft.l) / 2;
+
+    float2 distPosToBottomTriPoint = normalize(pos - midPoint);
+    float2 distTopTriPointToBottomTriPoint = normalize(treeObj[0].leavesLeft.t - midPoint);
+    float projectionPointToTreeSlope = max(dot(distPosToBottomTriPoint, distTopTriPointToBottomTriPoint),0);
+
+    //leaf occurence noise
+    inTri *= round(snoise(pos * float2(2, 4) + noiseOfset) * 0.5 + 0.5 + (projectionPointToTreeSlope * 0.1)) ;//);
+    float solidInTri = inTri;
+    //leaf color noise
+    inTri -= inTri * (round(snoise(pos * float2(5, 25) + noiseOfset)) * 0.5 + 0.5) * 0.2;
+
+    inPoly = clamp(inPoly, 0, 1);
+    inTri = clamp(inTri,0, 1);
+    solidInTri = clamp(solidInTri, 0, 1);
+    solidInPoly = clamp(solidInPoly, 0, 1);
+    float3 barkColor = float3(0.1372549, 0.1333333, 0.1294118) * inPoly;
+    float4 bark = float4(barkColor, 1) * solidInPoly;
+    float3 leafColor = float3(0.1058824, 0.1568628, 0.2117647) * inTri;
+    float4 leaves =  float4(leafColor, 1) * solidInTri;
+    treeText[id.xy] = bark * (1 - solidInTri) + leaves;
+}
+
+int leafCount;
+
+//x: texture x dimension
+//y: texture y dimension
+//z: number of leaves
+[numthreads(15, 15, 1)]
+void leafDraw(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = float2((float2)id.xy / (float)texResolution.x);
+    float noiseOfset = hash11(leafCount) * 1000;
+
+    for (int i = 0; i < leafCount; i++)
+    {
+        //float inTri = inTriangle(pos, tri);
+        float inTri = inTriangle(pos, leafObjs[i].rootTri);
+        inTri += inTriangle(pos, leafObjs[i].topTri);
+        float solidInTri = inTri;
+        //leaf color noise
+        inTri -= inTri * (round(snoise(pos * float2(5, 9) + noiseOfset)) * 0.5 + 0.5) * 0.13;
+
+        //float inTri = inPolygon(pos, leafObjs[id.z].leafy);
+        float3 leafColor = float3(0.1058824, 0.1568628, 0.2117647) * inTri;
+        float4 leaves = float4(leafColor, 1) * inTri;
+
+        treeText[id.xy] *= (1 - solidInTri);
+        treeText[id.xy] += leaves;
+    }
+}

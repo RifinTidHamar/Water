@@ -144,6 +144,7 @@ public class crowd : MonoBehaviour
         wallBuffer = new ComputeBuffer(walls.Length, wallSize);
         wallBuffer.SetData(wallPos);
         comp.SetBuffer(crowdHandle, "walls", wallBuffer);
+
         argsBuff = new ComputeBuffer(1, 5 * sizeof(uint), ComputeBufferType.IndirectArguments);
         argsArr[0] = (uint)fella.GetIndexCount(0);
         argsArr[1] = (uint)crowdCount;
