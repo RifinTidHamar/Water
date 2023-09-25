@@ -14,6 +14,9 @@ public class TreeGeneration : MonoBehaviour
     [SerializeField]
     int leafCount = 25;
 
+    [SerializeField]
+    int leafRange = 5;
+
     int leafDrawHandle;
     int barkDrawHandle;
     RenderTexture outputTexture;
@@ -129,7 +132,9 @@ public class TreeGeneration : MonoBehaviour
             Vector2 baseLoc = new Vector2(leafBaseX, leafBaseY);
 
             //where leaf ends
-            float leafLength = Random.Range(0.05f, 0.15f);
+            float leafMin = 0.05f;
+            float leafMax = 0.22f;
+            float leafLength = Random.Range(leafMin, leafMax);
 
             // Calculate the x-component of the perpendicular vector
             float flip = (slope >= 0) ? 1f : - 1f;
@@ -138,7 +143,10 @@ public class TreeGeneration : MonoBehaviour
             Vector2 perpendicularVector = new Vector2(-slope * flip, 1 * flip).normalized;  // Swap components
             Vector2 leafEnd = baseLoc + (perpendicularVector * leafLength);
 
-            float rotation = Random.Range(45f, 135f);
+            float rotRange = 70;
+            float rotation = Mathf.Lerp(-rotRange, rotRange, (leafLength - leafMin) / leafMax);
+            rotation += 90;
+            //float rotation   = Random.Range(0f, 180f);
             leafEnd = RotatePoint(leafEnd, baseLoc, rotation);
 
             //how thick leaf
@@ -175,7 +183,7 @@ public class TreeGeneration : MonoBehaviour
         tree t = new tree();
         float xBaseBark1Loc = Random.Range(0.3f, 0.6f);
         float xBaseBark1Width = Random.Range(0.05f, 0.1f);
-        float yTopBark1Loc = Random.Range(0.1f, 0.3f);
+        float yTopBark1Loc = Random.Range(0.1f, 0.45f);
         float xTopBark1Loc = Random.Range(0.3f, 0.6f);
         float xTopBark1Width = Random.Range(0.05f, 0.08f);
 
@@ -194,15 +202,15 @@ public class TreeGeneration : MonoBehaviour
         t.bark2 = createPolyGon(bark2Base, xBaseBark2Width, bark2Top, xTopBark2Width);
         totalPath.Add(getPath(t.bark2));
 
-        float xBaseBark3Width = xTopBark2Width;
-        float yTopBark3Loc = yTopBark2Loc + Random.Range(0.2f, 0.3f);
-        float xTopBark3Loc = Random.Range(0.3f, 0.6f);
-        float xTopBark3Width = 0;
+        //float xBaseBark3Width = xTopBark2Width;
+        //float yTopBark3Loc = yTopBark2Loc + Random.Range(0.2f, 0.3f);
+        //float xTopBark3Loc = Random.Range(0.3f, 0.6f);
+        //float xTopBark3Width = 0;
 
-        Vector2 bark3Base = bark2Top;
-        Vector2 bark3Top = new Vector2(xTopBark3Loc, yTopBark3Loc);
-        t.bark3 = createPolyGon(bark3Base, xBaseBark3Width, bark3Top, xTopBark3Width);
-        totalPath.Add(getPath(t.bark3));
+        //Vector2 bark3Base = bark2Top;
+        //Vector2 bark3Top = new Vector2(xTopBark3Loc, yTopBark3Loc);
+        //t.bark3 = createPolyGon(bark3Base, xBaseBark3Width, bark3Top, xTopBark3Width);
+        //totalPath.Add(getPath(t.bark3));
 
         //Vector2 leavesTop = bark3Top;
         //float xBaseLeavesLoc = Random.Range(0.3f, 0.6f);
@@ -230,7 +238,7 @@ public class TreeGeneration : MonoBehaviour
 
         //lets do a test first just to make sure we can draw the things
         treeArr = new tree[1];
-        int adder = Random.Range(-10, 10);
+        int adder = Random.Range(-leafRange, leafRange);
         leafCount += adder;
         leafArr = new leaf[leafCount];
         treeArr[0] = createTree();
