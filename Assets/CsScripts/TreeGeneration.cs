@@ -37,12 +37,8 @@ public class TreeGeneration : MonoBehaviour
 
     public struct tree
     {
-
         public polygon bark1;
         public polygon bark2;
-        public polygon bark3;
-        public trilygon leavesLeft;
-        //public trilygon leavesRight;
     }
 
     public struct leaf
@@ -59,7 +55,7 @@ public class TreeGeneration : MonoBehaviour
 
     static int polygonSize = (sizeof(float) * 2) * 4;
     static int triangleSize = (sizeof(float) * 2) * 3;
-    static int treeBuffSize = triangleSize * 1 + polygonSize * 3;
+    static int treeBuffSize = polygonSize * 2;
     static int leafBuffSize = triangleSize * 2;
     tree[] treeArr;
     leaf[] leafArr;
@@ -181,10 +177,10 @@ public class TreeGeneration : MonoBehaviour
         ArrayList totalPath = new ArrayList();
 
         tree t = new tree();
-        float xBaseBark1Loc = Random.Range(0.3f, 0.6f);
+        float xBaseBark1Loc = 0.5f;
         float xBaseBark1Width = Random.Range(0.05f, 0.1f);
         float yTopBark1Loc = Random.Range(0.1f, 0.45f);
-        float xTopBark1Loc = Random.Range(0.3f, 0.6f);
+        float xTopBark1Loc = 0.5f;
         float xTopBark1Width = Random.Range(0.05f, 0.08f);
 
         Vector2 bark1Base = new Vector2(xBaseBark1Loc, 0);
@@ -193,31 +189,15 @@ public class TreeGeneration : MonoBehaviour
         //totalPath.Add(getPath(t.bark1));
 
         float xBaseBark2Width = xTopBark1Width;
-        float yTopBark2Loc = yTopBark1Loc + Random.Range(0.2f, 0.3f);
-        float xTopBark2Loc = Random.Range(0.3f, 0.6f);
-        float xTopBark2Width = Random.Range(0.03f, 0.06f);
+        float rem = 1 - yTopBark1Loc;
+        float yTopBark2Loc = yTopBark1Loc + Random.Range(0.2f, rem);
+        float xTopBark2Loc = 0.51f;// Random.Range(0.3f, 0.6f);
+        float xTopBark2Width = 0;// Random.Range(0.03f, 0.06f);
 
         Vector2 bark2Base = bark1Top;
         Vector2 bark2Top = new Vector2(xTopBark2Loc, yTopBark2Loc);
         t.bark2 = createPolyGon(bark2Base, xBaseBark2Width, bark2Top, xTopBark2Width);
         totalPath.Add(getPath(t.bark2));
-
-        //float xBaseBark3Width = xTopBark2Width;
-        //float yTopBark3Loc = yTopBark2Loc + Random.Range(0.2f, 0.3f);
-        //float xTopBark3Loc = Random.Range(0.3f, 0.6f);
-        //float xTopBark3Width = 0;
-
-        //Vector2 bark3Base = bark2Top;
-        //Vector2 bark3Top = new Vector2(xTopBark3Loc, yTopBark3Loc);
-        //t.bark3 = createPolyGon(bark3Base, xBaseBark3Width, bark3Top, xTopBark3Width);
-        //totalPath.Add(getPath(t.bark3));
-
-        //Vector2 leavesTop = bark3Top;
-        //float xBaseLeavesLoc = Random.Range(0.3f, 0.6f);
-        //float yBaseLeavesLoc = leavesTop.y - Random.Range(0.3f, 0.7f);
-        //float xBaseLeavesWidth = Random.Range(0.2f, 0.4f);
-        //Vector2 leavesBase = new Vector2(xBaseLeavesLoc, yBaseLeavesLoc);
-        //t.leavesLeft = createTrilygon(leavesBase, xBaseLeavesWidth, leavesTop);
 
         setLeaves(totalPath);
 
@@ -268,7 +248,6 @@ public class TreeGeneration : MonoBehaviour
         textureDraw.Dispatch(leafDrawHandle, 9, 9, 1/*leafCount*/);
         leafCount -= adder;
     }
-    float time = 0;
 
    
     private void OnDestroy()

@@ -29,9 +29,6 @@ struct tree
 {
     polygon bark1;
     polygon bark2;
-    polygon bark3;
-    trilygon leavesLeft;
-    //trilygon leavesRight;
 };
 
 struct leaf
@@ -101,35 +98,18 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     float2 pos = float2((float2)id.xy / (float)texResolution.x);
     float inPoly = inPolygon(pos, treeObj[0].bark1);
     inPoly += inPolygon(pos, treeObj[0].bark2);
-    inPoly += inPolygon(pos, treeObj[0].bark3);
     float solidInPoly = inPoly;
     float noiseOfset = hash11(treeObj[0].bark1.bl) * 1000;
     //bark color noise
     inPoly -= inPoly * round(snoise(pos * float2(25, 5) + noiseOfset) * 0.5 + 0.7) * 0.2;
-    float inTri = inTriangle(pos, treeObj[0].leavesLeft);
-    //inTri += inTriangle(pos, treeObj[0].leavesRight);
-
-    float2 midPoint = (treeObj[0].leavesLeft.r + treeObj[0].leavesLeft.l) / 2;
-
-    float2 distPosToBottomTriPoint = normalize(pos - midPoint);
-    float2 distTopTriPointToBottomTriPoint = normalize(treeObj[0].leavesLeft.t - midPoint);
-    float projectionPointToTreeSlope = max(dot(distPosToBottomTriPoint, distTopTriPointToBottomTriPoint),0);
-
-    //leaf occurence noise
-    inTri *= round(snoise(pos * float2(2, 4) + noiseOfset) * 0.5 + 0.5 + (projectionPointToTreeSlope * 0.1)) ;//);
-    float solidInTri = inTri;
-    //leaf color noise
-    inTri -= inTri * (round(snoise(pos * float2(5, 25) + noiseOfset)) * 0.5 + 0.5) * 0.2;
-
+    
     inPoly = clamp(inPoly, 0, 1);
-    inTri = clamp(inTri,0, 1);
-    solidInTri = clamp(solidInTri, 0, 1);
+
     solidInPoly = clamp(solidInPoly, 0, 1);
     float3 barkColor = float3(0.1372549, 0.1333333, 0.1294118) * inPoly;
     float4 bark = float4(barkColor, 1) * solidInPoly;
-    float3 leafColor = float3(0.1058824, 0.1568628, 0.2117647) * inTri;
-    float4 leaves =  float4(leafColor, 1) * solidInTri;
-    treeText[id.xy] = bark * (1 - solidInTri) + leaves;
+   
+    treeText[id.xy] = bark;
 }
 
 int leafCount;

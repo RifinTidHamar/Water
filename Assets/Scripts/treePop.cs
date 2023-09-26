@@ -9,11 +9,12 @@ public class treePop : MonoBehaviour
     int treeCount = 1000;
 
     [SerializeField]
-    float percentage = 0;
+    float power = 2;
 
     // Update is called once per frame
     private void Update()
     {
+       
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             GameObject[] allTrees = GameObject.FindGameObjectsWithTag("tree");
@@ -26,12 +27,18 @@ public class treePop : MonoBehaviour
                 float zDisplacement = Random.Range(0f, 1f);
                 float xDisplacement = Random.Range(-2.5f, 8.5f);
                 GameObject curTree = Instantiate(treePrefab, new Vector3(xDisplacement, 1.28f, (zDisplacement) + 1.5f), Quaternion.identity);
+                //GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("Assets/Resources/prefab/tree.prefab"), new Vector3(xDisplacement, 1.28f, (zDisplacement) + 1.5f), Quaternion.identity) as GameObject;//Instantiate(treePrefab, new Vector3(xDisplacement, 1.28f, (zDisplacement) + 1.5f), Quaternion.identity);
                 Renderer rend = curTree.GetComponent<Renderer>();
                 rend.material = new Material(Shader.Find("Unlit/transparentColor"));
-                if (zDisplacement > percentage)
-                {
-                    rend.material.SetColor("_Color", new Vector4(0.392889f, 0.5716448f, 0.764151f, 1));
-                }
+                Vector4 noCol = Vector4.one;
+                Vector4 darkCol = new Vector4(0.092889f, 0.2716448f, 0.464151f, 1);
+
+                Vector4 newCol = Vector4.Lerp(noCol, darkCol, 1 - Mathf.Pow((1 - zDisplacement), power));// 1 - Mathf.Pow(zDisplacement, 5));
+                rend.material.SetColor("_Color", newCol);
+                //if (zDisplacement > percentage)
+                //{
+                //    rend.material.SetColor("_Color", ) ;
+                //}
                 curTree.GetComponent<TreeGeneration>().initBark();
             }
         }

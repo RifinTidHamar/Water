@@ -97,5 +97,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textureDraw: {fileID: 7200000, guid: f97ce8f56bea146458ae9abb9edea123, type: 3}
-  leafCount: 15
-  leafRange: 3
+  leafCount: 25
+  leafRange: 15
