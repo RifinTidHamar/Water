@@ -4,43 +4,132 @@ using UnityEngine;
 
 public class treePop : MonoBehaviour
 {
-    public GameObject treePrefab;
     [SerializeField]
     int treeCount = 1000;
 
     [SerializeField]
     float power = 2;
 
+    public Transform leftBound;
+    public Transform rightBound;
+    public Transform backBound;
     // Update is called once per frame
+
+    ArrayList treeArr;
+
+    Renderer[] treeRendArr;
+
+
+    Vector3 lb;
+    Vector3 rb;
+    Vector3 bb;
+
+    public Color LightEffectCol;// = Color.white;
+    public Color darkCol;// = Color.black;// = new Vector4(0.092889f, 0.2716448f, 0.464151f, 1);
+
+    void initTreeLoc(GameObject curTree)
+    {
+        float zDisplacement = bb.z;
+        int leftOrRight = Random.Range(0, 2);
+        float xDisplacement;
+        if (leftOrRight == 0)
+        {
+            xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.45f) + lb.x);
+        }
+        else
+        {
+            xDisplacement = Random.Range(((rb.x - lb.x) * 0.55f) + lb.x, rb.x);
+        }
+        curTree.transform.position = new Vector3(xDisplacement, lb.y + 4f, zDisplacement);
+        //GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("prefab/treeOrigin"), , Quaternion.identity) as GameObject;
+        //treeArr.Add(curTree);
+        zDisplacement -= lb.z;
+        zDisplacement /= bb.z;
+        float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
+        curTree.transform.localScale = Vector3.one;
+        curTree.transform.localScale *= Mathf.Lerp(3, 8, zDispCurve);
+        curTree = curTree.transform.GetChild(0).gameObject;
+        Renderer rend = curTree.GetComponent<Renderer>();
+        //rend.material = new Material(Resources.Load<Shader>("Shaders/transparentColor"));
+
+        Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
+        rend.material.SetColor("_Color", newCol);
+        curTree.GetComponent<TreeGeneration>().initBark();
+    }
+
+    private void Start()
+    {
+        treeArr = new ArrayList();
+
+        lb = leftBound.position;
+        rb = rightBound.position;
+        bb = backBound.position;
+
+        for (int i = 0; i < treeCount; i++)
+        {
+            float zDisplacement = Random.Range(lb.z, bb.z);
+            int leftOrRight = Random.Range(0, 2);
+            float xDisplacement;
+            if (leftOrRight == 0)
+            {
+                xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.45f) + lb.x);
+            }
+            else
+            {
+                xDisplacement = Random.Range(((rb.x - lb.x) * 0.55f) + lb.x, rb.x);
+            }
+            GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("prefab/treeOrigin"), new Vector3(xDisplacement, lb.y + 4f, zDisplacement), Quaternion.identity) as GameObject;
+            treeArr.Add(curTree);
+            zDisplacement -= lb.z;
+            zDisplacement /= bb.z;
+            float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
+            curTree.transform.localScale *= Mathf.Lerp(3, 8, zDispCurve);
+            curTree = curTree.transform.GetChild(0).gameObject;
+            Renderer rend = curTree.GetComponent<Renderer>();
+            rend.material = new Material(Resources.Load<Shader>("Shaders/transparentColor"));
+
+            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
+            rend.material.SetColor("_Color", newCol);
+            curTree.GetComponent<TreeGeneration>().initBark();
+        }
+        Time.timeScale = 4;
+    }
+
     private void Update()
     {
-       
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        for (int i = 0; i < treeArr.Count; i++)
         {
-            GameObject[] allTrees = GameObject.FindGameObjectsWithTag("tree");
-            foreach(GameObject tree in allTrees)
-            {
-                Destroy(tree);
-            }
-            for(int i = 0; i < treeCount; i++)
-            {
-                float zDisplacement = Random.Range(0f, 1f);
-                float xDisplacement = Random.Range(-2.5f, 8.5f);
-                GameObject curTree = Instantiate(treePrefab, new Vector3(xDisplacement, 1.28f, (zDisplacement) + 1.5f), Quaternion.identity);
-                //GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("Assets/Resources/prefab/tree.prefab"), new Vector3(xDisplacement, 1.28f, (zDisplacement) + 1.5f), Quaternion.identity) as GameObject;//Instantiate(treePrefab, new Vector3(xDisplacement, 1.28f, (zDisplacement) + 1.5f), Quaternion.identity);
-                Renderer rend = curTree.GetComponent<Renderer>();
-                rend.material = new Material(Shader.Find("Unlit/transparentColor"));
-                Vector4 noCol = Vector4.one;
-                Vector4 darkCol = new Vector4(0.092889f, 0.2716448f, 0.464151f, 1);
+            GameObject curTree = (GameObject)treeArr[i];
+            float zDisplacement = curTree.transform.position.z;// + Time.deltaTime * 0.01f;
+            float moveSpeed = Time.deltaTime * 0.5f;
+            curTree.transform.position -= new Vector3(0, 0, moveSpeed * 0.05f);
+            zDisplacement -= lb.z;
+            zDisplacement /= bb.z;
+            float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
+            float curScale = curTree.transform.localScale.x;
+            curScale += Time.deltaTime * zDispCurve;
+            curTree.transform.localScale = new Vector3(curScale, curScale, curScale);
 
-                Vector4 newCol = Vector4.Lerp(noCol, darkCol, 1 - Mathf.Pow((1 - zDisplacement), power));// 1 - Mathf.Pow(zDisplacement, 5));
-                rend.material.SetColor("_Color", newCol);
-                //if (zDisplacement > percentage)
-                //{
-                //    rend.material.SetColor("_Color", ) ;
-                //}
-                curTree.GetComponent<TreeGeneration>().initBark();
+            float zeroToOneBounds = (curTree.transform.position.x - lb.x)/(rb.x - lb.x);
+
+            float horizEffector = Mathf.Lerp(-moveSpeed * 1.5f, moveSpeed * 1.5f, zeroToOneBounds);
+            Vector3 horizontalMove = new Vector3(horizEffector * zDispCurve, 0, 0);
+            curTree.transform.position += horizontalMove;
+
+            if (curTree.transform.localScale.x > 27)
+            {
+                //treeArr.RemoveAt(i);
+                //Destroy(curTree);
+                initTreeLoc(curTree);
+                continue;
             }
+
+            curTree = curTree.transform.GetChild(0).gameObject;
+            Renderer rend = curTree.GetComponent<Renderer>();
+
+            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
+            rend.material.SetColor("_Color", newCol);
+            
         }
     }
 }
