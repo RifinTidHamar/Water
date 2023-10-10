@@ -6,7 +6,7 @@
 // with cs.SetTexture
 
 
-static int2 texResolution = int2(135, 135);
+static int2 texResolution = int2(256, 256);
 static float eps = 0;
 #include "noiseSimplex.cginc"
 
@@ -92,7 +92,7 @@ float inTriangle(float2 curUV, trilygon tri)
 //x: texture x dimension
 //y: texture y dimension
 //z: always 1
-[numthreads(15, 15, 1)]
+[numthreads(32, 32, 1)]
 void barkDraw(uint3 id : SV_DispatchThreadID)
 {
     float2 pos = float2((float2)id.xy / (float)texResolution.x);
@@ -116,8 +116,8 @@ int leafCount;
 
 //x: texture x dimension
 //y: texture y dimension
-//z: number of leaves
-[numthreads(15, 15, 1)]
+//z: always 1
+[numthreads(32, 32, 1)]
 void leafDraw(uint3 id : SV_DispatchThreadID)
 {
     float2 pos = float2((float2)id.xy / (float)texResolution.x);
@@ -130,11 +130,11 @@ void leafDraw(uint3 id : SV_DispatchThreadID)
         inTri += inTriangle(pos, leafObjs[i].topTri);
         float solidInTri = inTri;
         //leaf color noise
-        inTri -= inTri * (round(snoise(pos * float2(5, 9) + noiseOfset)) * 0.5 + 0.5) * 0.13;
+        inTri -= inTri * (round(snoise(pos * float2(5, 9) + noiseOfset)) * 0.5 + 0.5) * 0.2;
 
         //float inTri = inPolygon(pos, leafObjs[id.z].leafy);
         float3 leafColor = float3(0.1058824, 0.1568628, 0.2117647) * inTri;
-        float4 leaves = float4(leafColor, 1) * inTri;
+        float4 leaves = float4(leafColor, 1) * solidInTri;
 
         treeText[id.xy] *= (1 - solidInTri);
         treeText[id.xy] += leaves;

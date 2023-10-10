@@ -21,30 +21,18 @@ public class TreeGeneration : MonoBehaviour
     int barkDrawHandle;
     RenderTexture outputTexture;
 
-    public struct trilygon
-    {
-        public Vector2 t;
-        public Vector2 r;
-        public Vector2 l;
-    }
-    public struct polygon
-    {
-        public Vector2 tl;
-        public Vector2 tr;
-        public Vector2 br;
-        public Vector2 bl;
-    }
+    
 
     public struct tree
     {
-        public polygon bark1;
-        public polygon bark2;
+        public Shape.polygon bark1;
+        public Shape.polygon bark2;
     }
 
     public struct leaf
     {
-        public trilygon rootTri;
-        public trilygon topTri;
+        public Shape.trilygon rootTri;
+        public Shape.trilygon topTri;
     }
 
     public struct barkPath
@@ -53,36 +41,17 @@ public class TreeGeneration : MonoBehaviour
         public Vector2 top;
     }
 
-    static int polygonSize = (sizeof(float) * 2) * 4;
-    static int triangleSize = (sizeof(float) * 2) * 3;
-    static int treeBuffSize = polygonSize * 2;
-    static int leafBuffSize = triangleSize * 2;
+    
+    static int treeBuffSize = Shape.polygonSize * 2;
+    static int leafBuffSize = Shape.triangleSize * 2;
     tree[] treeArr;
     leaf[] leafArr;
     ComputeBuffer treeBuff;
     ComputeBuffer leafBuff;
 
-    polygon createPolyGon(Vector2 baseLoc, float baseWidth, Vector2 topLoc, float topWidth)
-    {
-        polygon poly = new polygon();
-        poly.bl = new Vector2(baseLoc.x - (baseWidth/2), baseLoc.y);
-        poly.br = new Vector2(baseLoc.x + (baseWidth / 2), baseLoc.y);
-        poly.tl = new Vector2(topLoc.x - (topWidth / 2), topLoc.y);
-        poly.tr = new Vector2(topLoc.x + (topWidth / 2), topLoc.y);
-        return poly;
-    }
+   
 
-    trilygon createTrilygon(Vector2 baseLoc, float baseWidth, Vector2 topLoc)
-    {
-        trilygon tri = new trilygon();
-
-        tri.t = topLoc;
-        tri.r = new Vector2(baseLoc.x + (baseWidth / 2), baseLoc.y);
-        tri.l = new Vector2(baseLoc.x - (baseWidth / 2), baseLoc.y);
-        return tri;
-    }
-
-    barkPath getPath(polygon poly)
+    barkPath getPath(Shape.polygon poly)
     {
         barkPath path = new barkPath();
         path.bot = new Vector2((poly.bl.x + poly.br.x) / 2, (poly.bl.y + poly.br.y) / 2);
@@ -156,12 +125,12 @@ public class TreeGeneration : MonoBehaviour
             Vector2 leafTl = new Vector2(baseLoc.x - leafThick, baseLoc.y);
             Vector2 leafTr = new Vector2(baseLoc.x + leafThick, baseLoc.y);
 
-            trilygon rootTri = new trilygon();
+            Shape.trilygon rootTri = new Shape.trilygon();
             rootTri.t = leafTl;
             rootTri.r = leafTr;
             rootTri.l = leafBl;
 
-            trilygon topTri = new trilygon();
+            Shape.trilygon topTri = new Shape.trilygon();
             topTri.t = leafTr;
             topTri.r = leafBr;
             topTri.l = leafBl;
@@ -185,7 +154,7 @@ public class TreeGeneration : MonoBehaviour
 
         Vector2 bark1Base = new Vector2(xBaseBark1Loc, 0);
         Vector2 bark1Top = new Vector2(xTopBark1Loc, yTopBark1Loc);
-        t.bark1 = createPolyGon(bark1Base,xBaseBark1Width, bark1Top, xTopBark1Width);
+        t.bark1 = Shape.createPolyGon(bark1Base,xBaseBark1Width, bark1Top, xTopBark1Width);
         //totalPath.Add(getPath(t.bark1));
 
         float xBaseBark2Width = xTopBark1Width;
@@ -196,7 +165,7 @@ public class TreeGeneration : MonoBehaviour
 
         Vector2 bark2Base = bark1Top;
         Vector2 bark2Top = new Vector2(xTopBark2Loc, yTopBark2Loc);
-        t.bark2 = createPolyGon(bark2Base, xBaseBark2Width, bark2Top, xTopBark2Width);
+        t.bark2 = Shape.createPolyGon(bark2Base, xBaseBark2Width, bark2Top, xTopBark2Width);
         totalPath.Add(getPath(t.bark2));
 
         setLeaves(totalPath);
@@ -229,7 +198,7 @@ public class TreeGeneration : MonoBehaviour
         leafBuff = new ComputeBuffer(leafCount, leafBuffSize);
         leafBuff.SetData(leafArr);
 
-        outputTexture = new RenderTexture(135, 135, 0);
+        outputTexture = new RenderTexture(256, 256, 0);
         outputTexture.enableRandomWrite = true;
         outputTexture.filterMode = FilterMode.Point;
         outputTexture.Create();
@@ -244,8 +213,8 @@ public class TreeGeneration : MonoBehaviour
         textureDraw.SetInt("leafCount", leafCount);
         mat.SetTexture("_MainTex", outputTexture);
 
-        textureDraw.Dispatch(barkDrawHandle, 9, 9, 1);
-        textureDraw.Dispatch(leafDrawHandle, 9, 9, 1/*leafCount*/);
+        textureDraw.Dispatch(barkDrawHandle, 8, 8, 1);
+        textureDraw.Dispatch(leafDrawHandle, 8, 8, 1/*leafCount*/);
         leafCount -= adder;
     }
 

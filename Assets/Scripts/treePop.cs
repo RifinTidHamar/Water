@@ -72,11 +72,11 @@ public class treePop : MonoBehaviour
             float xDisplacement;
             if (leftOrRight == 0)
             {
-                xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.45f) + lb.x);
+                xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.46f) + lb.x);
             }
             else
             {
-                xDisplacement = Random.Range(((rb.x - lb.x) * 0.55f) + lb.x, rb.x);
+                xDisplacement = Random.Range(((rb.x - lb.x) * 0.54f) + lb.x, rb.x);
             }
             GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("prefab/treeOrigin"), new Vector3(xDisplacement, lb.y + 4f, zDisplacement), Quaternion.identity) as GameObject;
             treeArr.Add(curTree);
@@ -91,8 +91,9 @@ public class treePop : MonoBehaviour
             Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
             rend.material.SetColor("_Color", newCol);
             curTree.GetComponent<TreeGeneration>().initBark();
+            Debug.Log("loaded");
         }
-        Time.timeScale = 4;
+        //Time.timeScale = 4;
     }
 
     private void Update()
@@ -116,7 +117,7 @@ public class treePop : MonoBehaviour
             Vector3 horizontalMove = new Vector3(horizEffector * zDispCurve, 0, 0);
             curTree.transform.position += horizontalMove;
 
-            if (curTree.transform.localScale.x > 27)
+            if (curTree.transform.localScale.x > 38)
             {
                 //treeArr.RemoveAt(i);
                 //Destroy(curTree);
