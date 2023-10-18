@@ -35,7 +35,8 @@ public class LoadScene : MonoBehaviour
 
     public void Load(string sceneName)
     {
-        SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        //SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        PixelCrushers.SaveSystem.LoadScene(sceneName);
         DialogueManager.SetDialoguePanel(false);
     }
 }

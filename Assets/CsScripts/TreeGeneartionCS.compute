@@ -104,9 +104,12 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     inPoly -= inPoly * round(snoise(pos * float2(25, 5) + noiseOfset) * 0.5 + 0.7) * 0.2;
     
     inPoly = clamp(inPoly, 0, 1);
-
+    
+    float lerpVal = abs(pos.x + (round(snoise(pos * float2(25, 5) + noiseOfset) * 10) / 10 * 0.02) - 0.5) * 10;
+    float shad = round(lerp(0, 1, lerpVal) * 5) / 5;
+    shad *= 0.5;
     solidInPoly = clamp(solidInPoly, 0, 1);
-    float3 barkColor = float3(0.1372549, 0.1333333, 0.1294118) * inPoly;
+    float3 barkColor = float3(0.1372549, 0.1333333, 0.1294118) * (inPoly - shad);
     float4 bark = float4(barkColor, 1) * solidInPoly;
    
     treeText[id.xy] = bark;

@@ -8,12 +8,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Crack.unity
     guid: 3a2354546382fe149b83adbd2090c3ca
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Rifin.unity
     guid: ff8c4435a5e64c5419efc3f4a0764f45
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TestScene.unity
     guid: ec909784a81a1624a8895a92e17e384f
+  - enabled: 1
+    path: Assets/Scenes/LogCrossingScene.unity
+    guid: 00828fd0583b72848ba0ebb3aa108371
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2f592624c4ded6141b0d03fe234e3ec2, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 9ca6d084c3c33c8488cbe89115e4a52b, type: 2}

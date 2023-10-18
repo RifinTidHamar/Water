@@ -33,6 +33,9 @@ public class Gyroscope : MonoBehaviour
     public GameObject cube;
     Quaternion gyroOffset = Quaternion.identity;
     bool doGyro = false;
+    Quaternion rotQuat;
+    Vector3 origRot;
+    public static float yRotation;
     // Start is called before the first frame update
     void Start()
     {
@@ -41,8 +44,8 @@ public class Gyroscope : MonoBehaviour
 
     IEnumerator startGyro()
     {
-        gx.text = "here";
-        yield return new WaitForSeconds(2.0f); // Wait for 2 seconds
+        //gx.text = "here";
+        yield return new WaitForSeconds(0.5f); // Wait for 2 seconds
         initGyro();
     }
 
@@ -52,20 +55,31 @@ public class Gyroscope : MonoBehaviour
         {
             Input.gyro.enabled = true;
             doGyro = true;
+            Vector3 up = new Vector3(0, 0, 1);
+            Vector3 left = new Vector3(1, 0, 0);
+            Vector3 fore = new Vector3(0, 1, 0);
+            origRot = Input.gyro.attitude.eulerAngles;
+            //Vector3 originalZAxis = Vector3.Scale(Input.gyro.attitude.eulerAngles, up);
+            //Vector3 originalXAxis = Vector3.Scale(Input.gyro.attitude.eulerAngles, left);
+            //Vector3 originalYAxis = Vector3.Scale(Input.gyro.attitude.eulerAngles, fore);
+            Vector3 crossForeGyro = Vector3.Cross(fore, origRot);
+            Vector3 crossLeftGyro = Vector3.Cross(left, origRot);
+            Vector3 crossUpGyro = Vector3.Cross(up, origRot);
 
-            Vector3 originalZAxis = Vector3.Scale(Input.gyro.attitude.eulerAngles, Vector3.up);
-            Vector3 originalXAxis = Vector3.Scale(Input.gyro.attitude.eulerAngles, Vector3.left);
-            Vector3 originalYAxis = Vector3.Scale(Input.gyro.attitude.eulerAngles, Vector3.forward);
-            float yangle = Vector3.SignedAngle(originalYAxis, Vector3.forward, originalXAxis);
-            float xangle = Vector3.SignedAngle(originalXAxis, Vector3.left, originalZAxis);
-            float zangle = Vector3.SignedAngle(originalZAxis, Vector3.up, originalYAxis);
-            Quaternion rotQuat = Quaternion.Euler(new Vector3(xangle, yangle, zangle));
-            gyroOffset = Quaternion.Inverse(Input.gyro.attitude * rotQuat);
+            float yangle = Vector3.SignedAngle(fore, origRot, crossForeGyro);
+            float xangle = Vector3.SignedAngle(left, origRot, crossLeftGyro);
+            float zangle = Vector3.SignedAngle(up, origRot, crossUpGyro);
 
+             rotQuat = Quaternion.Euler(fore);
+
+            //ox.text = "y angle: " +  yangle;
+
+            //rotQuat = Quaternion.Euler(new Vector3(0, -yangle, 0));
+            gyroOffset = Quaternion.Inverse(Input.gyro.attitude) /** Quaternion.Inverse(rotQuat)*/;
         }
         else
         {
-            gx.text = "gyro not supported";
+            //gx.text = "gyro not supported";
         }
     }
 
@@ -80,25 +94,26 @@ public class Gyroscope : MonoBehaviour
                 initGyro();
             }
 
+
             //checkGyroOnce = false;s
-            Quaternion gyro = GyroToUnity(Input.gyro.attitude * gyroOffset);
-            gx.text = "X: " + Mathf.Round((gyro.x / Mathf.PI) * 1000f) / 1000f;
-            gy.text = "Y: " + Mathf.Round((gyro.y / Mathf.PI) * 1000f) / 1000f;
-            gz.text = "Z: " + Mathf.Round((gyro.z / Mathf.PI) * 1000f) / 1000f;
-            gw.text = "W: " + Mathf.Round((gyro.w / Mathf.PI) * 1000f) / 1000f;
-            //Quaternion newGyro = new Quaternion(gyro.y, 0, 0, gyro.w);
+            //rotQuat = Quaternion.FromToRotation(origRot, Input.gyro.attitude.eulerAngles);
+
+            Quaternion gyro = GyroToUnity(Input.gyro.attitude * gyroOffset/* * Quaternion.Inverse(rotQuat)*/);
+            //gx.text = "X: " + Mathf.Round((gyro.x / Mathf.PI) * 1000f) / 1000f;
+            //gy.text = "Y: " + Mathf.Round((gyro.y / Mathf.PI) * 1000f) / 1000f;
+            //gz.text = "Z: " + Mathf.Round((gyro.z / Mathf.PI) * 1000f) / 1000f;
+            //gw.text = "W: " + Mathf.Round((gyro.w / Mathf.PI) * 1000f) / 1000f;
             Vector3 tilt = Quaternion.ToEulerAngles(gyro);//newGyro);
-            //Vector3 zeroTilt = new Vector3(
-            //    tilt.x - origV3.x,
-            //    tilt.y - origV3.y,
-            //    tilt.z - origV3.z);
+
             float tiltX = (tilt.x / Mathf.PI);
             float tiltY = (tilt.y / Mathf.PI);
             float tiltZ = (tilt.z / Mathf.PI);
 
-            fx.text = "X: " + Mathf.Round(tiltX * 1000f) / 1000f;
-            fy.text = "Y: " + Mathf.Round(tiltY * 1000f) / 1000f;
-            fz.text = "Z: " + Mathf.Round(tiltZ * 1000f) / 1000f;
+            yRotation = tiltY;
+
+            //fx.text = "X: " + Mathf.Round(tiltX * 1000f) / 1000f;
+            //fy.text = "Y: " + Mathf.Round(tiltY * 1000f) / 1000f;
+            //fz.text = "Z: " + Mathf.Round(tiltZ * 1000f) / 1000f;
 
             //ox.text = "X: " + gyroOffset.x;
             //oy.text = "Y: " + gyroOffset.y;

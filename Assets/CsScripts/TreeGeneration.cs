@@ -211,6 +211,7 @@ public class TreeGeneration : MonoBehaviour
         textureDraw.SetBuffer(leafDrawHandle, "leafObjs", leafBuff);
         textureDraw.SetTexture(leafDrawHandle, "treeText", outputTexture);
         textureDraw.SetInt("leafCount", leafCount);
+        
         mat.SetTexture("_MainTex", outputTexture);
 
         textureDraw.Dispatch(barkDrawHandle, 8, 8, 1);

@@ -1,0 +1,51 @@
+#pragma kernel Smoke
+#pragma kernel SmoothPath
+#include "noiseSimplex.cginc"
+
+RWTexture2D<float4> smokeText;
+
+int texRes;
+float dt;
+float time;
+int pCnt;
+struct smokeParticle
+{
+    float2 vel;
+    int2 pos;
+    float temp;
+    int id;
+};
+
+RWStructuredBuffer<smokeParticle> smp;
+
+[numthreads(64, 1, 1)]
+void Smoke(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = float2((float2) smp[id.x].pos / (float) texRes);
+    
+    for (int i = 0; i < pCnt; i++)
+    {
+        if (id.x == (uint) i)
+            continue;
+        float2 pos2 = float2((float2) smp[i].pos / (float) texRes);
+        float dst = abs(distance(pos, pos2));
+        if (dst < 0.05)
+            continue;
+        float attr = (1 / dst);
+        float2 direction = normalize(pos2 - pos);
+        smp[id.x].vel += direction * attr;
+    
+    }
+    float2 startNoise = float2(id.x, time);
+    float noise = snoise(startNoise);
+    pos += smp[id.x].vel * 0.000001;
+    smp[id.x].pos = round(pos * texRes);
+    
+    smokeText[smp[id.x].pos.xy] = float4(1, 1, 1, 1);
+}
+
+[numthreads(32, 32, 1)]
+void SmoothPath(uint3 id : SV_DispatchThreadID)
+{
+    smokeText[id.xy] -= 0.15;
+}

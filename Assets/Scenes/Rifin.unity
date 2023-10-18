@@ -552,7 +552,7 @@ PrefabInstance:
       addedObject: {fileID: 364575789}
     - targetCorrespondingSourceObject: {fileID: 125852, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 364575797}
+      addedObject: {fileID: 364575802}
   m_SourcePrefab: {fileID: 100100000, guid: 58ac37417e60e534f91138088a3e6f70, type: 3}
 --- !u!224 &364575786 stripped
 RectTransform:
@@ -626,7 +626,7 @@ MonoBehaviour:
   m_saveCurrentScene: 1
   m_framesToWaitBeforeApplyData: 0
   m_debug: 0
---- !u!114 &364575797
+--- !u!114 &364575802
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2360,7 +2360,7 @@ MonoBehaviour:
   leftBound: {fileID: 1927571453}
   rightBound: {fileID: 313003870}
   backBound: {fileID: 401746133}
-  LightEffectCol: {r: 0.85800004, g: 0.5065851, b: 0.5065851, a: 1}
+  LightEffectCol: {r: 1, g: 0.5890411, b: 0.5890411, a: 1}
   darkCol: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &1485343038
 GameObject:
