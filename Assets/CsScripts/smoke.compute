@@ -1,51 +1,247 @@
 #pragma kernel Smoke
 #pragma kernel SmoothPath
+//#pragma kernel CreateTable
+
 #include "noiseSimplex.cginc"
+#pragma enable_d3d11_debug_symbols
 
 RWTexture2D<float4> smokeText;
 
-int texRes;
-float dt;
+float4 mPos;
+
+int texRes;//resoultion of the texture
+static float dt = 0.01666666666;
 float time;
-int pCnt;
+int pCnt;//total particles in the simulation
+//int cCnt;//total number of cells in the table
+//int idPCell;//max ids in a cell
+
+//struct cell
+//{
+//    int cPart[511];//when changing this value, also change argument for calcNFree as well as the cellCount in the c# scirpt
+//    int nFree;
+//};
+
+
 struct smokeParticle
 {
     float2 vel;
+    float2 mVel;
     int2 pos;
-    float temp;
     int id;
+    int2 cInd;
 };
 
-RWStructuredBuffer<smokeParticle> smp;
+
+RWStructuredBuffer<smokeParticle> smp; //smoke particles
+//RWStructuredBuffer<cell> tbl; //table of cells
+//int calcNFree(int c[511])//when changing this value, also change argument for cell struct as well as the cellCount in the c# scirpt
+//{
+//    int index = 0;
+//    for (int i = 0; i < idPCell; i++)
+//    {
+//        if (c[i] == 0)
+//        {
+//            index = i;
+//            break;
+//        }
+//    }
+//    return index;
+//}
+
+//float2 searchCellForVel (int2 ind, float2 pos, int curId)
+//{
+//    int index = ind.y * (uint) cCnt / (uint) 2 + ind.x;
+//    float2 vel = float2(0, 0);
+//    for (int i = 0; i < idPCell; i++)
+//    {
+//        int otherID = tbl[index].cPart[i];
+//        if (otherID == curId)//index is base 1 according to c# code
+//            break;
+//        if ((uint) tbl[index].cPart[i] == (uint) curId)
+//            continue;
+//        float2 pos2 = float2((float2) smp[otherID].pos / (float) texRes);
+//        float dst = abs(distance(pos, pos2));
+//        if (dst < 0.01 || dst > 0.5)
+//            continue;
+//        float attr = (1 / dst) / 20;
+//        float2 direction = normalize(pos2 - pos);
+//        vel += direction * attr;
+//    }
+//    return vel;
+//}
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+        //p -= 0.5;
+    return p;
+}
 
 [numthreads(64, 1, 1)]
 void Smoke(uint3 id : SV_DispatchThreadID)
 {
-    float2 pos = float2((float2) smp[id.x].pos / (float) texRes);
+    float4 noCol = float4(0, 0, 0, 0);
+    //smokeText[smp[id.x].pos.xy + int2(0, 1)] = noCol;
+    //smokeText[smp[id.x].pos.xy + int2(0, -1)] = noCol;
+    //smokeText[smp[id.x].pos.xy + int2(1, 0)] = noCol;
+    //smokeText[smp[id.x].pos.xy + int2(-1, 0)] = noCol;
     
+    //smokeText[smp[id.x].pos.xy + int2(1, 1)] = noCol;
+    //smokeText[smp[id.x].pos.xy + int2(1, -1)] = noCol;
+    //smokeText[smp[id.x].pos.xy + int2(-1, 1)] = noCol;
+    //smokeText[smp[id.x].pos.xy + int2(-1, -1)] = noCol;
+
+    //smokeText[smp[id.x].pos.xy] = noCol;
+    
+    float2 pos = float2((float2) smp[id.x].pos / (float) texRes);
+    float attrCof = pCnt / 16;
+    //int2 curInd = smp[id.x].cInd;
+    //smp[id.x].vel += searchCellForVel(curInd, pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(0, 1), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(0, -1), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(1, 0), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(-1, 0), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(1, 1), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(-1, -1), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(1, -1), pos, smp[id.x].id);
+    //smp[id.x].vel += searchCellForVel(curInd + int2(-1, 1), pos, smp[id.x].id);
     for (int i = 0; i < pCnt; i++)
     {
         if (id.x == (uint) i)
             continue;
         float2 pos2 = float2((float2) smp[i].pos / (float) texRes);
         float dst = abs(distance(pos, pos2));
-        if (dst < 0.05)
+        if (dst < 0.3 /*|| dst > 0.5*/)
             continue;
-        float attr = (1 / dst);
+        float attr = (1 / dst) / attrCof;
         float2 direction = normalize(pos2 - pos);
-        smp[id.x].vel += direction * attr;
-    
+        float2 attrXY = float2(attr, attr * 0.2);
+        smp[id.x].vel += direction * attrXY;
     }
-    float2 startNoise = float2(id.x, time);
-    float noise = snoise(startNoise);
-    pos += smp[id.x].vel * 0.000001;
-    smp[id.x].pos = round(pos * texRes);
     
-    smokeText[smp[id.x].pos.xy] = float4(1, 1, 1, 1);
+    //for mouse
+    float2 pos2 = mPos.xy;
+    float dst = abs(distance(pos, pos2));
+    
+    //for mouse
+    
+    smp[id.x].vel = clamp(smp[id.x].vel, -10, 10);
+    //if(dst < 0.2 && dst > 0.02)
+    //{
+    //    float attr = 1 / dst; // * attrCof * 0.01;
+    //    float2 direction = normalize(pos2 - pos);
+    //    smp[id.x].vel += direction * attr;
+    //}
+    if (dst < 0.05)
+    {
+        float attr = -1/dst;// * attrCof * 0.01;
+        float2 direction = normalize(pos2 - pos);
+        smp[id.x].mVel += direction * attr;
+    }
+    smp[id.x].mVel /= 1.5;
+    smp[id.x].vel.y += 10;
+    float noiseVal = snoise(pos.xy * float2(7, 50) + time * 0.05 + (smp[id.x].id)) * 3; //smallnoise
+    //noiseVal += snoise(pos.xy * float2(5, 50) + time * 0.2) * 2;//medium noise
+    noiseVal += (snoise(pos.xy * 2 + time * 0.1) + 0.5)*1.5; //big noise
+    int s = sign(noiseVal);
+    float invNoise = 1 - noiseVal;
+    float RorA = invNoise * (pos.y + 1); //lerp(1, invNoise, pos.y + 0.5); //(abs(noiseVal) * 0.2 + 0.8 + 0.2) * s;
+    pos += (smp[id.x].mVel + smp[id.x].vel) * 0.01 * dt * float2(RorA, 1);
+    //pos.y += 0.01;
+    if (pos.y > 1 || pos.y < 0 )
+    {
+        //pos.y = hash11(pos.x);
+        pos.y = 0;
+        pos.x = hash11(pos.x + smp[id.x].id) * 0.1 + 0.5;
+        smp[id.x].vel = 0;
+    }
+    //if (pos.x > 1 || pos.x < 0)
+    
+    //    pos.x = 
+    //    pos.y = hash11(pos.y);
+    //    //pos.x = hash11(pos.x) * 0.5 + 0.25;
+    //}
+    smp[id.x].pos = round(pos * texRes);
+    //smp[id.x].vel = 0;
+    ////really not necessary to do in here
+    //int cellHW = (uint) cCnt / (uint) 2;
+    //int pixelsPerCell = (uint) texRes / (uint) cellHW;
+    ////really not necessary to do in here
+    
+    //int2 ind = (int2) (smp[id.x].pos / (uint) pixelsPerCell);
+    //int index = ind.y * cellHW + ind.x;
+    //tbl[index].cPart[tbl[index].nFree] = smp[id.x].id;
+    //tbl[index].nFree = calcNFree(tbl[index].cPart);
+    //index = smp[id.x].cInd.r * cellHW * smp[id.x].cInd.x;
+    //tbl[index].nFree = calcNFree(tbl[index].cPart);
+    int ps = 3;
+    for (int l = -ps; l < ps; l++)
+    {
+        for (int w = -ps; w < ps; w++)
+        {
+            smokeText[smp[id.x].pos.xy + int2(l, w)] = float4(1, 1, 1, 1);
+        }
+    }
 }
 
-[numthreads(32, 32, 1)]
+static int kSize = 5;
+
+[numthreads(8, 8, 1)]
 void SmoothPath(uint3 id : SV_DispatchThreadID)
 {
-    smokeText[id.xy] -= 0.15;
+    float4 result = float4(0, 0, 0, 0);
+    for (int y = -kSize; y <= kSize; y++)
+    {
+        for (int x = -kSize; x <= kSize; x++)
+        {
+            result += smokeText[id.xy + int2(x, y)] / float((2 * kSize + 1) * (2 * kSize + 1));
+        }
+    }
+    smokeText[id.xy] = result;
+    smokeText[id.xy] -= 0.07;
 }
+
+//[numthreads(1, 1, 1)]
+//void CreateTable(uint3 id : SV_DispatchThreadID)
+//{
+//    int cellHW = (int) sqrt(cCnt);
+//    int HWpixelsPerCell = (uint) texRes / (uint) cellHW;
+    
+//    for (int i = 0; i < cCnt; i++)
+//    {
+//        //tbl[i].cPart[idPCell];
+//        for (int j = 0; j < idPCell; j++)
+//        {
+//            tbl[i].cPart[j] = -1;
+//        }
+//        tbl[i].nFree = 0;
+//    }
+    
+//    for (int k = 0; k < pCnt; k++)
+//    {
+//        int2 ind = (int2) (smp[k].pos / (uint) HWpixelsPerCell);
+//        int index = ind.y * cellHW + ind.x;
+//        tbl[index].cPart[tbl[index].nFree] = smp[k].id;
+//        tbl[index].nFree++;
+
+//        smp[k].cInd = ind;
+//    }
+//}
+
+//change pCnt to look through the 9 surrounding cells(including current cell)
+    //for (int i = 0; i < pCnt; i++)
+    //{
+    //    if (id.x == (uint) i)
+    //        continue;
+    //    float2 pos2 = float2((float2) smp[i].pos / (float) texRes);
+    //    float dst = abs(distance(pos, pos2));
+    //    if (dst < 0.01 || dst > 0.5)
+    //        continue;
+    //    float attr = (1 / dst) / 20;
+    //    float2 direction = normalize(pos2 - pos);
+    //    smp[id.x].vel += direction * attr;
+    //}
