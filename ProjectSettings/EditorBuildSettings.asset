@@ -17,9 +17,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/LogCrossingScene.unity
     guid: 00828fd0583b72848ba0ebb3aa108371
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/ExtinguishedFire.unity
     guid: 6c2a949932e4a3c458aa3d43dcf05983
+  - enabled: 1
+    path: Assets/Scenes/TotemMake.unity
+    guid: 92c133dc8e38cf24aac8cce006b4cb2a
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2f592624c4ded6141b0d03fe234e3ec2, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 9ca6d084c3c33c8488cbe89115e4a52b, type: 2}

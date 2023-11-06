@@ -1,9 +1,9 @@
-Shader "Unlit/transparentColor"
+Shader"Unlit/transparentColor"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color Multiplier", Color) = (1,1,1,1)
+        _MainTex ("_MainTex", 2D) = "white" {}
+        _Color ("_Color", Color) = (1,1,1,1)
     }
     SubShader
     {
@@ -33,6 +33,7 @@ Shader "Unlit/transparentColor"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+
             float4 _Color;
 
             v2f vert (appdata v)

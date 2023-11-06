@@ -1,0 +1,67 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel emitParticle
+
+struct fireParticle
+{
+	float s;
+    float heat;
+    float lum;
+	float mass;
+    float3 pos;
+    float3 velocity;
+};
+
+struct vertex
+{
+	float3 pos;
+};
+
+
+RWStructuredBuffer<fireParticle> parti;
+StructuredBuffer<fireParticle> partiSaved;
+RWStructuredBuffer<vertex> vrt;
+
+float dt;
+
+float hash11(float p)
+{
+	p = frac(p * 0.1031);
+	p *= p + 33.33;
+	p *= p + p;
+	p = frac(p);
+	//p -= 0.5;
+	return p;
+}
+
+void respawn(uint id)
+{
+	parti[id].s = hash11(parti[id].s) + 0.5;
+	parti[id].pos = partiSaved[id].pos;
+	parti[id].heat = partiSaved[id].heat;
+	parti[id].lum = partiSaved[id].lum;
+	float randVal = hash11(parti[id].velocity.x);
+	randVal -= 0.5;
+	float3 vel = partiSaved[id].velocity;
+	parti[id].velocity = float3(vel.x * randVal, vel.y * ((randVal + 0.5) * 0.2 + 0.8), vel.z * randVal) * 2;
+}
+
+[numthreads(90, 1, 1)]
+void emitParticle(uint3 id : SV_DispatchThreadID)
+{
+	parti[id.x].heat -= dt * 0.7;
+	parti[id.x].lum -= dt / 10;
+	parti[id.x].pos += parti[id.x].velocity * dt;
+	if (parti[id.x].heat < 0.1)
+		respawn(id.x);
+
+	float si = 0.006;
+	int index = id.x * 6;
+	vrt[index + 5].pos = float3(-si, -si, 0) * parti[id.x].s;
+	vrt[index + 4].pos = float3(-si,  si, 0) * parti[id.x].s;
+	vrt[index + 3].pos = float3( si,  si, 0) * parti[id.x].s;
+
+	vrt[index + 2].pos = float3(-si, -si, 0) * parti[id.x].s;
+	vrt[index + 1].pos = float3( si,  si, 0) * parti[id.x].s;
+	vrt[index + 0].pos = float3( si, -si, 0) * parti[id.x].s;
+}
+

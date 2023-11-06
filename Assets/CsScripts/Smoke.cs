@@ -1,18 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.UI;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class Smoke : MonoBehaviour
 {
+    [SerializeField]
+    Vector4 offsetVector;
+
     public ComputeShader smoke;
+
+    public Camera firstCamera;
+    public Camera secondCamera;
+    public GameObject plane;// = new Plane(Vector3.up, transform.position);
 
     public Material mat;
     int smokeHandle;
     int pathHandle;
     int tableHandle;
-    RenderTexture outputTexture;
-    int texRes = 512;
+    int blurHandle;
+    RenderTexture outTex;
+    int texRes = 64;
 
     //struct cell
     //{
@@ -22,11 +34,12 @@ public class Smoke : MonoBehaviour
 
     struct smokeParticle
     {
-        public Vector2 velocity;
-        public Vector2 mVel;
-        public Vector2Int position;
+        public Vector3 velocity;
+        public Vector3 mVel;
+        public float upSpeed;
+        public Vector3Int position;
         public int id;
-        public Vector2Int cInd;
+        public Vector3Int cInd;
     }
 
     //ComputeBuffer cellBuff;
@@ -39,12 +52,13 @@ public class Smoke : MonoBehaviour
     //static int cellCount = 16;
 
     int smokeParticleCount = 512;
-    int smokeParticleSize = (sizeof(float) * 2) * 2 + (sizeof(int) * 2) * 2 + (sizeof(int) * 1);
+    int smokeParticleSize = (sizeof(float) * 3) * 2 + (sizeof(float) * 1) + (sizeof(int) * 3) * 2 + (sizeof(int) * 1);
     uint gSizeParticle = 0;
     uint gSizeText = 0;
     //int dtID;
     int timeID;
     int mouseID;
+    int rDirID;
     //make grid somehow
 
     // Start is called before the first frame update
@@ -56,24 +70,44 @@ public class Smoke : MonoBehaviour
     //make a cone that feeds into the heating part
     void init()
     {
-        outputTexture = new RenderTexture(texRes, texRes, 0);
-        outputTexture.enableRandomWrite = true;
-        outputTexture.filterMode = FilterMode.Point;
-        outputTexture.Create();
+        outTex = new RenderTexture((int)texRes, (int)texRes, 0, GraphicsFormat.R8G8B8A8_UNorm);
+        outTex.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
+        outTex.volumeDepth = (int)texRes;
+        //outTex.wrapMode = 
+        outTex.enableRandomWrite = true;
+        outTex.filterMode = FilterMode.Point;
+        outTex.Create();
 
         smokeArr = new smokeParticle[smokeParticleCount];
-        int quartTexRes = texRes / 8;
+        int quartTexRes = 0;// texRes / 0;
 
         for (int i = 0; i < smokeParticleCount; i++)
         {
             smokeParticle smPart = new smokeParticle();
-            int spawnX = (int)Random.Range(0 + quartTexRes, texRes - quartTexRes);
-            int spawnY = (int)Random.Range(0, texRes);
-            smPart.position = new Vector2Int(spawnX, spawnY);
-            smPart.velocity = Vector2.zero;
+
+            int x = (int)UnityEngine.Random.Range(0, texRes);
+            int y = (int)UnityEngine.Random.Range(0, texRes);
+            int z = (int)UnityEngine.Random.Range(0, texRes);
+
+            // Sample 3D Perlin noise at the random position.
+            float3 position3D = new float3(x, y, z);
+            float perlinValue3D = noise.snoise(position3D) * texRes;
+
+            // Create a new point at the sampled position.
+            Vector3 spawnPosition = new Vector3(x, y + perlinValue3D, z);
+
+            int spawnX = (int)UnityEngine.Random.Range(0 + quartTexRes, texRes - quartTexRes);
+            int spawnY = 0;// (int)UnityEngine.Random.Range(0, texRes);
+            int spawnZ = (int)UnityEngine.Random.Range(0 + quartTexRes, texRes - quartTexRes);
+            float3 noiseInp = new float3(spawnX, spawnY, spawnZ);
+            int spawn = (int)(noise.snoise(noiseInp) * (float)texRes);
+
+            smPart.position = new Vector3Int(spawnX, spawn, spawnZ);
+            smPart.velocity = Vector3.zero;
             smPart.id = i+1;
-            smPart.mVel = new Vector2(0, 0);
-            smPart.cInd = new Vector2Int(0, 0);
+            smPart.mVel = new Vector3(0, 0, 0);
+            smPart.cInd = new Vector3Int(0, 0, 0);
+            smPart.upSpeed = UnityEngine.Random.Range(0.2f, 2f);
             smokeArr[i] = smPart;
         }
 
@@ -84,16 +118,21 @@ public class Smoke : MonoBehaviour
 
         smoke.SetInt("texRes", texRes);
         smoke.SetInt("pCnt", smokeParticleCount);
+       
+        smoke.SetVector("wSpace", new Vector4(117.156998f, -0.238000005f, -0.0399999991f,1));
         //smoke.SetInt("cCnt", cellCount);
         //smoke.SetInt("idPCell", IdPerCell);
 
         smokeHandle = smoke.FindKernel("Smoke");
         smoke.SetBuffer(smokeHandle, "smp", smokeBuff);
         //smoke.SetBuffer(smokeHandle, "tbl", cellBuff);
-        smoke.SetTexture(smokeHandle, "smokeText", outputTexture);
+        smoke.SetTexture(smokeHandle, "smokeText", outTex);
 
         pathHandle = smoke.FindKernel("SmoothPath");
-        smoke.SetTexture(pathHandle, "smokeText", outputTexture);
+        smoke.SetTexture(pathHandle, "smokeText", outTex);
+
+        blurHandle = smoke.FindKernel("Blur");
+        smoke.SetTexture(blurHandle, "smokeText", outTex);
 
         //tableHandle = smoke.FindKernel("CreateTable");
         //smoke.SetBuffer(tableHandle, "smp", smokeBuff);
@@ -103,54 +142,39 @@ public class Smoke : MonoBehaviour
         //dtID = Shader.PropertyToID("dt");
         timeID = Shader.PropertyToID("time");
         mouseID = Shader.PropertyToID("mPos");
+        rDirID = Shader.PropertyToID("rDir");
         smoke.GetKernelThreadGroupSizes(smokeHandle, out gSizeParticle, out _, out _);
         gSizeParticle = (uint) smokeParticleCount / gSizeParticle;
 
         smoke.GetKernelThreadGroupSizes(pathHandle, out gSizeText, out _, out _);
         gSizeText = (uint)texRes / gSizeText;
 
-        mat.SetTexture("_MainTex", outputTexture);
+        mat.SetTexture("_MainTex", outTex);
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 normScreen = new Vector3((float)1 / (float)Screen.width, (float)1 / (float)Screen.width, 1);
-
-        Vector3 mPos = Vector3.Scale(Input.mousePosition, normScreen);
-
-        Vector3 objPos = this.transform.position;
-        float objScale = this.transform.lossyScale.x/2;
-
-        Vector3 objRPos = objPos + new Vector3(objScale, -objScale, 0);
-        objRPos = Camera.main.WorldToScreenPoint(objRPos);
-        objRPos = Vector3.Scale(objRPos, normScreen);
-
-        objPos += new Vector3(-objScale, -objScale, 0);
-        objPos = Camera.main.WorldToScreenPoint(objPos);
-        objPos = Vector3.Scale(objPos, normScreen);
-
-        objScale = Vector3.Distance(objPos, objRPos);
-        Vector3 normScale = new Vector3((float)1 / (float)objScale, (float)1 / (float)objScale, 1);
-
-
-        Vector3 mObjPos = mPos - objPos;
-        mObjPos = Vector3.Scale(mObjPos, normScale);
-        Debug.Log(mObjPos);
-        Vector4 mObjV4 = new Vector4(mObjPos.x, mObjPos.y, 0, 0);
-
+        CamToUv camToUv = new CamToUv();
+        Vector2 mouseUvPos = camToUv.genMousePosOnImage(firstCamera, plane);
+        Vector4 mObjV4 = new Vector4(mouseUvPos.x, mouseUvPos.y, 0, 0);
+        Ray ray = secondCamera.ViewportPointToRay(new Vector3(mObjV4.x, mObjV4.y, 0.2f));
+        //Debug.Log(mObjV4);
         //smoke.SetFloat(dtID, Time.deltaTime);
-        if(Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
-            smoke.SetVector(mouseID, mObjV4);
+            smoke.SetVector(mouseID, ray.origin);
+            smoke.SetVector(rDirID, ray.direction);
         }
         else
         {
-            smoke.SetVector(mouseID, new Vector4(-1, -1, 0, 0));
+            smoke.SetVector(mouseID, new Vector4(-1, -1, -1, 0));
+            smoke.SetVector(rDirID, new Vector4(0, -1, 0, 0));
         }
         smoke.SetFloat(timeID, Time.time);
         smoke.Dispatch(smokeHandle, (int)gSizeParticle, 1, 1);
-        smoke.Dispatch(pathHandle, (int)gSizeText, (int)gSizeText, 1);
+        smoke.Dispatch(blurHandle, (int)gSizeText, (int)gSizeText, (int)gSizeText);
+        smoke.Dispatch(pathHandle, (int)gSizeText, (int)gSizeText, (int)gSizeText);
     }
 
     private void OnApplicationQuit()

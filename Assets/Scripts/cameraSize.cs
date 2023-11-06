@@ -5,6 +5,7 @@ using UnityEngine;
 public class cameraSize : MonoBehaviour
 {
     public GameObject square; // Reference to your square GameObject
+    public 
 
     void Start()
     {
@@ -13,7 +14,7 @@ public class cameraSize : MonoBehaviour
 
     void FitSquareToCamera()
     {
-        Camera mainCamera = Camera.main;
+        Camera mainCamera = this.GetComponent<Camera>();
         float targetAspect = mainCamera.aspect;
 
         float squareWidth = square.GetComponent<Renderer>().bounds.size.x;
