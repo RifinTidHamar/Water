@@ -1,14 +1,13 @@
 #pragma kernel Clay
 #pragma kernel CheckClearGrid
-#pragma kernel CheckGrid
 #pragma enable_d3d11_debug_symbols
 
 RWTexture2D<float4> clayText;
 
 float4 mPos; //mouse pos
 
-int cellHW; //how many cells per side of Grid
-int grdRes; //size of each Grid Cell (cells overlap by one pixel
+int gCellHW; //how many cells per side of Grid
+int cellRes; //size of each Grid Cell (cells overlap by one pixel
 int texRes; //resoultion of the texture
 static float dt = 0.001666666666;
 int pCnt; //total particles in the simulation
@@ -40,14 +39,17 @@ float hash11(float p)
 void Clay(uint3 id : SV_DispatchThreadID)
 {
     float4 noCol = float4(0, 0, 0, 0);
-    int ps = 6;
-    //int l = 0;
-    //int h = 0;
+    int ps = 5; // This is the radius of the circle
+
     for (int l = -ps; l < ps; l++)
     {
         for (int h = -ps; h < ps; h++)
         {
-            clayText[cPart[id.x].pos.xy + int2(l, h)] = noCol;
+            float hyp = sqrt(l * l + h * h);
+            if(hyp <= ps)
+            {
+                clayText[cPart[id.x].pos.xy + int2(l, h)] = noCol;
+            }
         }
     }
     
@@ -81,7 +83,7 @@ void Clay(uint3 id : SV_DispatchThreadID)
     
     mPos = float4(mPos.x, 1 - mPos.y, 0, 0);
     float dst = abs(distance(pos, mPos.xy));
-    if (dst < 0.1)
+    if (dst < 0.15)
     {
         float2 direction = normalize(mPos.xy - pos);
         vel += direction * -5 * dt;
@@ -110,48 +112,39 @@ void Clay(uint3 id : SV_DispatchThreadID)
     
     cPart[id.x].pos = round(pos * texRes);
     
-    int x = (uint)cPart[id.x].pos.x / (uint)grdRes;
-    int y = (uint)cPart[id.x].pos.y / (uint)grdRes;
-    int index = y * cellHW + x;
-   
+    int x = (uint)cPart[id.x].pos.x / (uint)cellRes;
+    int y = (uint)cPart[id.x].pos.y / (uint)cellRes;
+    int index = y * gCellHW + x;
+    
+    if (empC[index] == 1)
+    {
+        cPart[id.x].safe = 0;
+    }
+    else
+    {
+        cPart[id.x].safe = 1;
+    }
     for (int l = -ps; l < ps; l++)
     {
         for (int h = -ps; h < ps; h++)
         {
-            if (empC[index] == 1)
+            float hyp = sqrt(l * l + h * h);
+            if (hyp <= ps)
             {
-                clayText[cPart[id.x].pos.xy + int2(l, h)] = float4(1, 0, 0, 1);
-            }
-            else
-            {
-                clayText[cPart[id.x].pos.xy + int2(l, h)] = float4(1, 1, 1, 1);
+                if (empC[index] == 1)
+                {
+                    clayText[cPart[id.x].pos.xy + int2(l, h)] = float4(1, 0, 0, 1);
+                }
+                else
+                {
+                    float t = hash11(cPart[id.x].id) * 0.2 + 0.8;
+                    clayText[cPart[id.x].pos.xy + int2(l, h)] = float4(t, t, t, 1);
+                }
             }
         }
     }
-    
     //clayText[cPart[id.x].pos.xy + int2(l, h)] = float4(1, 1, 1, 1);
 }
-
-[numthreads(64, 1, 1)]
-void CheckGrid(uint3 id : SV_DispatchThreadID)
-{
-    int x = (uint)cPart[id.x].pos.x / (uint)grdRes;
-    int y = (uint)cPart[id.x].pos.y / (uint)grdRes;
-    int index = y * cellHW + x;
-    cPart[id.x].safe = 0;
-    /*if (empC[index] == 1)
-   {
-       cPart[id.x].safe = 0;
-   }
-   else
-   {
-       cPart[id.x].safe = 1;
-   }*/
-}
-
-
-//empty buffer not setting
-//safe int in Cpart buffer not setting. 
 
 [numthreads(1, 1, 1)]
 void CheckClearGrid(uint3 id : SV_DispatchThreadID)
@@ -159,6 +152,14 @@ void CheckClearGrid(uint3 id : SV_DispatchThreadID)
     int empty = 1;
     for (int i = 0; i < pCnt; i++)
     {
+        /*int x = (int) cPart[i].pos.x / (int) cellRes;
+        int y = (int) cPart[i].pos.y / (int) cellRes;
+        int index = y * gCellHW + x;
+        if (empC[index] == 1)
+        {
+            empty = false;
+            break;
+        }*/
         if (cPart[i].safe == 0)
         {
             empty = 0;

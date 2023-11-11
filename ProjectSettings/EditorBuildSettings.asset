@@ -8,10 +8,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Crack.unity
     guid: 3a2354546382fe149b83adbd2090c3ca
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Rifin.unity
     guid: ff8c4435a5e64c5419efc3f4a0764f45
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/TestScene.unity
     guid: ec909784a81a1624a8895a92e17e384f
   - enabled: 0
@@ -20,7 +20,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/ExtinguishedFire.unity
     guid: 6c2a949932e4a3c458aa3d43dcf05983
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TotemMake.unity
     guid: 92c133dc8e38cf24aac8cce006b4cb2a
   m_configObjects:

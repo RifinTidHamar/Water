@@ -7,7 +7,7 @@ Shader"Unlit/transparentColor"
     }
     SubShader
     {
-        Tags { "RenderType" = "Transparent"  "QUEUE" = "Transparent" }
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "RenderQueue" = "1995" }
         Blend SrcAlpha OneMinusSrcAlpha
 
         Pass

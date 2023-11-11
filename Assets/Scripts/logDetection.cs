@@ -12,7 +12,6 @@ public class logDetection : MonoBehaviour
         // Define the half-extents of the box (width, height, depth) for detection
 
         // Cast a box-shaped ray forward from the player's position
-        RaycastHit hit;
         Collider[] hitCollider = Physics.OverlapBox(transform.position, halfExtents, transform.rotation);
         if (hitCollider.Length != 0)
         {

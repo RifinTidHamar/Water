@@ -8,7 +8,7 @@ public class barkTextureGeneration : MonoBehaviour
 
     public Material mat;
     int barkDrawHandle;
-    RenderTexture outputTexture;
+    RenderTexture outTex;
 
     // Start is called before the first frame update
     void Start()
@@ -18,22 +18,26 @@ public class barkTextureGeneration : MonoBehaviour
 
     void initBark()
     {
-        outputTexture = new RenderTexture(1024, 1024, 0);
-        outputTexture.enableRandomWrite = true;
-        outputTexture.filterMode = FilterMode.Point;
-        outputTexture.Create();
+        outTex = new RenderTexture(1024, 1024, 0);
+        outTex.enableRandomWrite = true;
+        outTex.filterMode = FilterMode.Point;
+        outTex.Create();
 
         barkDrawHandle = textureDraw.FindKernel("CreateTexture");
-        textureDraw.SetTexture(barkDrawHandle, "treeText", outputTexture);
+        textureDraw.SetTexture(barkDrawHandle, "treeText", outTex);
 
-        mat.SetTexture("_MainTex", outputTexture);
+        mat.SetTexture("_MainTex", outTex);
 
         textureDraw.Dispatch(barkDrawHandle, 32, 32, 1);
     }
 
+    private void OnDestroy()
+    {
+        outTex?.Release();
+    }
     // Update is called once per frame
     //void Update()
     //{
-        
+
     //}
 }

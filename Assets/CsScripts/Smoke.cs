@@ -177,13 +177,10 @@ public class Smoke : MonoBehaviour
         smoke.Dispatch(pathHandle, (int)gSizeText, (int)gSizeText, (int)gSizeText);
     }
 
-    private void OnApplicationQuit()
+    private void OnDestroy()
     {
-        if(smokeBuff != null)
-        {
-            smokeBuff.Dispose();
-        }
-
+        smokeBuff?.Dispose();
+        outTex?.Release();
         //if (cellBuff != null)
         //{
         //    cellBuff.Dispose();

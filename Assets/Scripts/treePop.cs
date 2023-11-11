@@ -5,6 +5,20 @@ using UnityEngine;
 public class treePop : MonoBehaviour
 {
     [SerializeField]
+    [Range(0, 3)]
+    float darkStart;
+
+    [SerializeField]
+    [Range(0, 3)]
+    float colPow;
+
+    [SerializeField]
+    int minS;
+
+    [SerializeField]
+    int maxS;
+
+    [SerializeField]
     int treeCount = 1000;
 
     [SerializeField]
@@ -34,11 +48,11 @@ public class treePop : MonoBehaviour
         float xDisplacement;
         if (leftOrRight == 0)
         {
-            xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.45f) + lb.x);
+            xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.46f) + lb.x);
         }
         else
         {
-            xDisplacement = Random.Range(((rb.x - lb.x) * 0.55f) + lb.x, rb.x);
+            xDisplacement = Random.Range(((rb.x - lb.x) * 0.54f) + lb.x, rb.x);
         }
         curTree.transform.position = new Vector3(xDisplacement, lb.y + 4f, zDisplacement);
         //GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("prefab/treeOrigin"), , Quaternion.identity) as GameObject;
@@ -47,17 +61,17 @@ public class treePop : MonoBehaviour
         zDisplacement /= bb.z;
         float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
         curTree.transform.localScale = Vector3.one;
-        curTree.transform.localScale *= Mathf.Lerp(3, 8, zDispCurve);
+        curTree.transform.localScale *= Mathf.Lerp(minS, maxS, zDispCurve);
         curTree = curTree.transform.GetChild(0).gameObject;
         Renderer rend = curTree.GetComponent<Renderer>();
         //rend.material = new Material(Resources.Load<Shader>("Shaders/transparentColor"));
 
-        Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
+        Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - Mathf.Pow(zDispCurve, colPow));// 1 - Mathf.Pow(zDisplacement, 5));
         rend.material.SetColor("_Color", newCol);
         curTree.GetComponent<TreeGeneration>().initBark();
     }
 
-    private void Start()
+    private void OnEnable()
     {
         treeArr = new ArrayList();
 
@@ -83,15 +97,15 @@ public class treePop : MonoBehaviour
             zDisplacement -= lb.z;
             zDisplacement /= bb.z;
             float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
-            curTree.transform.localScale *= Mathf.Lerp(3, 8, zDispCurve);
+            curTree.transform.localScale *= Mathf.Lerp(minS, maxS, zDispCurve);
             curTree = curTree.transform.GetChild(0).gameObject;
             Renderer rend = curTree.GetComponent<Renderer>();
             rend.material = new Material(Resources.Load<Shader>("Shaders/transparentColor"));
 
-            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
+            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - Mathf.Pow(zDispCurve, colPow));// 1 - Mathf.Pow(zDisplacement, 5));
             rend.material.SetColor("_Color", newCol);
             curTree.GetComponent<TreeGeneration>().initBark();
-            Debug.Log("loaded");
+            //Debug.Log("loaded");
         }
         //Time.timeScale = 4;
     }
@@ -128,7 +142,7 @@ public class treePop : MonoBehaviour
             curTree = curTree.transform.GetChild(0).gameObject;
             Renderer rend = curTree.GetComponent<Renderer>();
 
-            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, 1 - zDispCurve);// 1 - Mathf.Pow(zDisplacement, 5));
+            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - Mathf.Pow(zDispCurve, colPow));// 1 - Mathf.Pow(zDisplacement, 5));
             rend.material.SetColor("_Color", newCol);
             
         }

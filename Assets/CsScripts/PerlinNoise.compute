@@ -1,5 +1,6 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
+#pragma kernel NoiseOddRes
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
@@ -8,6 +9,7 @@ RWTexture2D<float4> Result;
 float dt;
 int texRes;
 float2 stretch;
+float4 texRes4;
 #include "noiseSimplex.cginc"
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -15,5 +17,16 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float2 pos = float2((((float2) id.xy) / (float) texRes) - 0.5);
     float noise = snoise(float3(pos * stretch - float2(0, dt * 3), dt / 5));
     noise += 1 - ((float) id.y / (float) texRes-  0.2) * 2;
+    Result[id.xy] = noise;
+}
+
+[numthreads(15, 27, 1)]
+void NoiseOddRes(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = float2((((float2) id.xy) / (float)texRes4.xy) - 0.5);
+    float noise = abs(snoise(float3(pos.xy * stretch, dt / 20))) * 0.15 + 0.85;
+    noise *= noise;
+    noise = round(noise * 10) / 10;
+    //noise += 1 - ((float)id.y / (float)texRes - 0.2) * 2;
     Result[id.xy] = noise;
 }

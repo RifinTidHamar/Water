@@ -11,44 +11,50 @@ public class SlapTimer : MonoBehaviour
     float lastDodgeTime;
     float frameTime;
     float lastButtonDisableTime;
-    bool anim = false;
-    static bool dodge;
+    //bool anim = false;
+    //static bool dodge;
     float timeBetwFrames = 0.1f;
 
     public Sprite[] frames;
     public SpriteRenderer sprRend;
-    public GameObject sand;
+    public Frame sand;
+    public GameObject sandFrame;
     public GameObject rayCatcher;
     public Button dodgeButt;
+
+    public Transform defaultPos;
+    public Transform dodgePos;
+    public Transform smackPos;
+
+    bool inSmackPos = false;
 
     // Start is called before the first frame update
     void Start()
     {
         lastSlapTime = Time.time;
-        dodge = false;
+        //Game = false;
         timeBetwSlaps = Random.Range(4, 7);
     }
 
     public void doDodge()
     {
-        dodge = true;
+        GameVars.isInDodge = true;
         lastDodgeTime = Time.time;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(dodge)
+        if(GameVars.isInDodge)
         {
             dodgeButt.interactable = false;
             lastButtonDisableTime = Time.time;
-            rayCatcher.SetActive(false);
-            sand.gameObject.transform.localPosition = new Vector3(0.268999994f, -0.164993092f, 10);
+            sandFrame.gameObject.transform.position = dodgePos.position;
             if (Time.time - lastDodgeTime >= 0.7f)
             {
-                sand.gameObject.transform.localPosition = new Vector3(-0.00499248505f, -0.164993092f, 10);
-                dodge = false;
-                rayCatcher.SetActive(true);
+                GameVars.isInDodge = false;
+                sandFrame.gameObject.transform.position = defaultPos.position;
+                //rayCatcher.SetActive(true);
             }
         }
         if (dodgeButt.interactable == false)
@@ -58,33 +64,39 @@ public class SlapTimer : MonoBehaviour
                 dodgeButt.interactable = true;
             }
         }
+        if(GameVars.isClayDone)
+        {
+            frameTime = Time.time;
+        }
         if (Time.time - lastSlapTime >= timeBetwSlaps)
         {
             timeBetwSlaps = Random.Range(4, 7);
             //Debug.Log("slap");
-            anim = true;
+            GameVars.isInAnim = true;
             frameTime = Time.time;
         }
-        if (anim)
+        if (GameVars.isInAnim)
         {
             lastSlapTime = Time.time; // in order that the timer doesn't interfere with the slap
 
             if (Time.time - frameTime >= timeBetwFrames * 8)
             {
-                if(!dodge)
+                if (!GameVars.isInDodge && !GameVars.isClayDone)
                 {
-                    sand.gameObject.transform.localPosition = new Vector3(-0.00499248505f, -0.164993092f, 10);
+                    sandFrame.gameObject.transform.position = defaultPos.position;
+                    inSmackPos = false;
+                    //sand.init();
                 }
                 sprRend.sprite = frames[0];
-                anim = false;
+                GameVars.isInAnim = false;
             }
             else if (Time.time - frameTime >= timeBetwFrames * 7)
             {
-                if (!dodge)
+                if (!GameVars.isInDodge && !GameVars.isClayDone && !inSmackPos)
                 {
-                    sand.gameObject.transform.localPosition = new Vector3(-0.00499248505f, -0.164993092f - 0.1f, 10);
-                    TotemSlap totem = sand.gameObject.GetComponent<TotemSlap>();
-                    totem.init();
+                    sandFrame.gameObject.transform.position = smackPos.position;
+                    sand.init();
+                    inSmackPos = true;
                 }
                 sprRend.sprite = frames[3];
             }

@@ -156,10 +156,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   treeCount: 0
-  grassCount: 100
+  grassCount: 30
   power: 1
   p: {fileID: 147341144}
-  LightEffectCol: {r: 0.6509434, g: 0.6509434, b: 0.6509434, a: 1}
+  LightEffectCol: {r: 0.6226415, g: 0.6020826, b: 0.6020826, a: 1}
   darkCol: {r: 0, g: 0, b: 0, a: 1}
 --- !u!64 &147341141
 MeshCollider:
@@ -473,7 +473,6 @@ GameObject:
   - component: {fileID: 483008178}
   - component: {fileID: 483008179}
   - component: {fileID: 483008180}
-  - component: {fileID: 483008181}
   m_Layer: 0
   m_Name: SmokeRendCam
   m_TagString: MainCamera
@@ -636,19 +635,6 @@ MonoBehaviour:
   w: 0
   cube: {fileID: 0}
 --- !u!114 &483008180
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 483008173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 781a9d765838909479b7f1cdcabdaee0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  camera: {fileID: 483008176}
---- !u!114 &483008181
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

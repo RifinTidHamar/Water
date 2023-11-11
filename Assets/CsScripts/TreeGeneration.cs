@@ -11,15 +11,15 @@ public class TreeGeneration : MonoBehaviour
 
     int treeCount = 1;//probably eventually however many trees are in the scene at one time
 
-    [SerializeField]
-    int leafCount = 25;
+    int leafCount = 75;
 
     [SerializeField]
     int leafRange = 5;
 
     int leafDrawHandle;
     int barkDrawHandle;
-    RenderTexture outputTexture;
+    int clearHandle;
+    RenderTexture outTex;
 
     
 
@@ -27,6 +27,7 @@ public class TreeGeneration : MonoBehaviour
     {
         public Shape.polygon bark1;
         public Shape.polygon bark2;
+        public int id;
     }
 
     public struct leaf
@@ -42,7 +43,7 @@ public class TreeGeneration : MonoBehaviour
     }
 
     
-    static int treeBuffSize = Shape.polygonSize * 2;
+    static int treeBuffSize = Shape.polygonSize * 2 + sizeof(int);
     static int leafBuffSize = Shape.triangleSize * 2;
     tree[] treeArr;
     leaf[] leafArr;
@@ -97,8 +98,8 @@ public class TreeGeneration : MonoBehaviour
             Vector2 baseLoc = new Vector2(leafBaseX, leafBaseY);
 
             //where leaf ends
-            float leafMin = 0.05f;
-            float leafMax = 0.22f;
+            float leafMin = 0.02f;
+            float leafMax = 0.1f;
             float leafLength = Random.Range(leafMin, leafMax);
 
             // Calculate the x-component of the perpendicular vector
@@ -108,14 +109,14 @@ public class TreeGeneration : MonoBehaviour
             Vector2 perpendicularVector = new Vector2(-slope * flip, 1 * flip).normalized;  // Swap components
             Vector2 leafEnd = baseLoc + (perpendicularVector * leafLength);
 
-            float rotRange = 70;
-            float rotation = Mathf.Lerp(-rotRange, rotRange, (leafLength - leafMin) / leafMax);
+            float rotRange = 60;
+            float rotation = Random.Range(-rotRange, rotRange);//Mathf.Lerp(-rotRange, rotRange, (leafLength - leafMin) / leafMax);
             rotation += 90;
             //float rotation   = Random.Range(0f, 180f);
             leafEnd = RotatePoint(leafEnd, baseLoc, rotation);
 
             //how thick leaf
-            float leafThick = Random.Range(0.01f, 0.03f);
+            float leafThick = Random.Range(0.005f, 0.015f);
 
             float perpSlope = -1f / slope;
             perpendicularVector = new Vector2(-Mathf.Abs(slope), 1f).normalized;  // Swap components
@@ -146,11 +147,13 @@ public class TreeGeneration : MonoBehaviour
         ArrayList totalPath = new ArrayList();
 
         tree t = new tree();
+        t.id = (int)Random.Range(0, 3);
+
         float xBaseBark1Loc = 0.5f;
-        float xBaseBark1Width = Random.Range(0.05f, 0.1f);
+        float xBaseBark1Width = Random.Range(0.02f, 0.07f);
         float yTopBark1Loc = Random.Range(0.1f, 0.45f);
         float xTopBark1Loc = 0.5f;
-        float xTopBark1Width = Random.Range(0.05f, 0.08f);
+        float xTopBark1Width = xBaseBark1Width - Random.Range(0.005f, 0.01f);
 
         Vector2 bark1Base = new Vector2(xBaseBark1Loc, 0);
         Vector2 bark1Top = new Vector2(xTopBark1Loc, yTopBark1Loc);
@@ -173,11 +176,10 @@ public class TreeGeneration : MonoBehaviour
         return t;
     }
 
-    public void Start()
-    {
- 
-        initBark();
-    }
+    //public void Start()
+    //{
+    //     initBark();
+    //}
 
     // Start is called before the first frame update
     public void initBark()
@@ -198,21 +200,24 @@ public class TreeGeneration : MonoBehaviour
         leafBuff = new ComputeBuffer(leafCount, leafBuffSize);
         leafBuff.SetData(leafArr);
 
-        outputTexture = new RenderTexture(256, 256, 0);
-        outputTexture.enableRandomWrite = true;
-        outputTexture.filterMode = FilterMode.Point;
-        outputTexture.Create();
+        outTex = new RenderTexture(256, 256, 0);
+        outTex.enableRandomWrite = true;
+        outTex.filterMode = FilterMode.Point;
+        outTex.Create();
 
         barkDrawHandle = textureDraw.FindKernel("barkDraw");
         textureDraw.SetBuffer(barkDrawHandle, "treeObj", treeBuff);
-        textureDraw.SetTexture(barkDrawHandle, "treeText", outputTexture);
+        textureDraw.SetTexture(barkDrawHandle, "treeText", outTex);
 
         leafDrawHandle = textureDraw.FindKernel("leafDraw");
         textureDraw.SetBuffer(leafDrawHandle, "leafObjs", leafBuff);
-        textureDraw.SetTexture(leafDrawHandle, "treeText", outputTexture);
+        textureDraw.SetTexture(leafDrawHandle, "treeText", outTex);
         textureDraw.SetInt("leafCount", leafCount);
-        
-        mat.SetTexture("_MainTex", outputTexture);
+
+        clearHandle = textureDraw.FindKernel("clearTexture");
+        textureDraw.SetTexture(clearHandle, "treeText", outTex);
+
+        mat.SetTexture("_MainTex", outTex);
 
         textureDraw.Dispatch(barkDrawHandle, 8, 8, 1);
         textureDraw.Dispatch(leafDrawHandle, 8, 8, 1/*leafCount*/);
@@ -222,13 +227,12 @@ public class TreeGeneration : MonoBehaviour
    
     private void OnDestroy()
     {
-        if(treeBuff != null)
-        {
-            treeBuff.Dispose();
-        }
-        if(leafBuff != null)
-        {
-            leafBuff.Dispose();
-        }
+        textureDraw.Dispatch(clearHandle, 8, 8, 1/*leafCount*/);
+
+        treeBuff?.Dispose();
+
+        leafBuff?.Dispose();
+
+        outTex.Release();
     }
 }
