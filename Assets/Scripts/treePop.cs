@@ -5,6 +5,9 @@ using UnityEngine;
 public class treePop : MonoBehaviour
 {
     [SerializeField]
+    bool moving;
+
+    [SerializeField]
     [Range(0, 3)]
     float darkStart;
 
@@ -112,6 +115,10 @@ public class treePop : MonoBehaviour
 
     private void Update()
     {
+        if(!moving)
+        {
+            return;
+        }
         for (int i = 0; i < treeArr.Count; i++)
         {
             GameObject curTree = (GameObject)treeArr[i];

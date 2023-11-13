@@ -1189,7 +1189,7 @@ MonoBehaviour:
       - title: Sequence
         value: 'SetActive(tag=trail, false);
 
-          SetActive(trail_walk, true);'
+          SetActive(Sitting, true);'
         type: 0
         typeString: CustomFieldType_Text
       conversationID: 1
@@ -1215,61 +1215,6 @@ MonoBehaviour:
         serializedVersion: 2
         x: 4147.949
         y: 366.7873
-        width: 160
-        height: 30
-    - id: 20
-      fields:
-      - title: Title
-        value: 
-        type: 0
-        typeString: CustomFieldType_Text
-      - title: Description
-        value: 
-        type: 0
-        typeString: CustomFieldType_Text
-      - title: Actor
-        value: 2
-        type: 5
-        typeString: CustomFieldType_Actor
-      - title: Conversant
-        value: 1
-        type: 5
-        typeString: CustomFieldType_Actor
-      - title: Menu Text
-        value: 
-        type: 0
-        typeString: CustomFieldType_Text
-      - title: Dialogue Text
-        value: 
-        type: 0
-        typeString: CustomFieldType_Text
-      - title: Sequence
-        value: 
-        type: 0
-        typeString: CustomFieldType_Text
-      conversationID: 1
-      isRoot: 0
-      isGroup: 1
-      nodeColor: 
-      delaySimStatus: 0
-      falseConditionAction: Block
-      conditionPriority: 2
-      outgoingLinks:
-      - originConversationID: 1
-        originDialogueID: 20
-        destinationConversationID: 1
-        destinationDialogueID: 24
-        isConnector: 0
-        priority: 2
-      conditionsString: 
-      userScript: 
-      onExecute:
-        m_PersistentCalls:
-          m_Calls: []
-      canvasRect:
-        serializedVersion: 2
-        x: 4139.9756
-        y: 693.70667
         width: 160
         height: 30
     - id: 24
@@ -1323,8 +1268,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 4374.019
-        y: 600.2574
+        x: 4194.7505
+        y: 728.3063
         width: 160
         height: 30
     - id: 29
@@ -1356,7 +1301,9 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
-        value: 
+        value: 'SetActive(tag=trail, false);
+
+          SetActive(trail_walk, true);'
         type: 0
         typeString: CustomFieldType_Text
       conversationID: 1
@@ -1380,8 +1327,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 4448
-        y: 743.26306
+        x: 4330.927
+        y: 782.2874
         width: 160
         height: 30
     - id: 30
@@ -7761,10 +7708,11 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: "The winds quietly cry from the mountains. A wolf's howl faintly echoes
-          from the forest. Intermittent voices softly speak from the town. And an
-          inaudible chant sounds from far off in the planes.\r\n\r\nWe pick ourself
-          up and walk into the night.\r"
+        value: 'The winds quietly cry from the mountains. A wolf''s howl faintly
+          echoes from the forest. Intermittent voices softly speak from the town.
+          And an inaudible chant sounds from far off in the planes.
+
+'
         type: 0
         typeString: 
       - title: Sequence
@@ -7782,7 +7730,7 @@ MonoBehaviour:
       - originConversationID: 1
         originDialogueID: 169
         destinationConversationID: 1
-        destinationDialogueID: 20
+        destinationDialogueID: 178
         isConnector: 0
         priority: 2
       conditionsString: 
@@ -7792,8 +7740,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 4149.0386
-        y: 579.5105
+        x: 4155.136
+        y: 557.5593
         width: 160
         height: 30
     - id: 170
@@ -8176,7 +8124,10 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
-        value: Let's sit for a moment.
+        value: 'Well, now we''re awake.
+
+
+          Let''s sit for a moment.'
         type: 0
         typeString: 
       - title: Dialogue Text
@@ -8186,7 +8137,7 @@ MonoBehaviour:
       - title: Sequence
         value: 'SetActive(Response Menu Panel, false);
 
-          Delay(5);
+          Delay(10);
 
           SetActive(Response
           Menu Panel, true);'
@@ -8217,9 +8168,121 @@ MonoBehaviour:
         y: 505.42194
         width: 160
         height: 30
+    - id: 178
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: 
+      - title: Description
+        value: 
+        type: 0
+        typeString: 
+      - title: Actor
+        value: 1
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 2
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Dialogue Text
+        value: Next
+        type: 0
+        typeString: 
+      - title: Sequence
+        value: 
+        type: 0
+        typeString: 
+      conversationID: 1
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks:
+      - originConversationID: 1
+        originDialogueID: 178
+        destinationConversationID: 1
+        destinationDialogueID: 179
+        isConnector: 0
+        priority: 2
+      conditionsString: 
+      userScript: 
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 4145.38
+        y: 628.29095
+        width: 160
+        height: 30
+    - id: 179
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: 
+      - title: Description
+        value: 
+        type: 0
+        typeString: 
+      - title: Actor
+        value: 2
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 1
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Dialogue Text
+        value: "\rWe pick ourself up and walk into the night.\r"
+        type: 0
+        typeString: 
+      - title: Sequence
+        value: 'SetActive(tag=trail, false);
+
+          SetActive(GettingUp, true);'
+        type: 0
+        typeString: 
+      conversationID: 1
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks:
+      - originConversationID: 1
+        originDialogueID: 179
+        destinationConversationID: 1
+        destinationDialogueID: 24
+        isConnector: 0
+        priority: 2
+      conditionsString: 
+      userScript: 
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 4147.819
+        y: 681.94946
+        width: 160
+        height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 3715.8574, y: 347.30078}
-    canvasZoom: 0.6099999
+    canvasScrollPosition: {x: 861.33203, y: 0}
+    canvasZoom: 0.1299999
   - id: 2
     fields:
     - title: Title

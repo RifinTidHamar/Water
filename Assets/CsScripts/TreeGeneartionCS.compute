@@ -116,8 +116,8 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     
     float noise = snoise(pos * float2(10, 10) + noiseOfset) * 0.5 + 0.5;
     noise *= ((snoise(pos * float2(100, 50) + noiseOfset) * 0.5 + 0.5) /*- (snoise(pos * float2(2, 2) + noiseOfset) * 0.5 + 0.5)*/);
-    float upperN = noise * pow((pos.y + 0.97), 150);
-    float lowerN = 1 - ((1 - noise) * pow((pos.y + 0.98), 150));
+    float upperN = noise * pow((pos.y + 0.95), 150);
+    float lowerN = 1 - ((1 - noise) * pow((pos.y + 0.96), 150));
     float rightN = (noise * pow((pos.x + 0.05), 25));
     float leftN = 1 - ((noise) * pow((pos.x + 0.95), 25));
 
