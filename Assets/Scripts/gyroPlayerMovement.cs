@@ -15,7 +15,7 @@ public class gyroPlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        this.transform.position += new Vector3(Gyroscope.yRotation * Time.deltaTime * 20, 0, forwardSpeed* Time.deltaTime);
+        this.transform.position += new Vector3(Gyroscope.yRotation * Time.deltaTime * 5, 0, forwardSpeed* Time.deltaTime);
         float normRot = (Gyroscope.yRotation * 2) + 0.5f;
         int framSelect = (int)Mathf.Lerp(0, frameCount - 1, normRot);
 

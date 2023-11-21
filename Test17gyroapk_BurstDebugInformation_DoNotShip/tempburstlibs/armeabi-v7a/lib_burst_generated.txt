@@ -26,11 +26,13 @@ Library: C:\Users\infer\Desktop\unitty\games\Water\Temp\BurstOutput\tempburstlib
 --assembly-defines=Unity.2D.SpriteShape.Runtime;
 --assembly-defines=Unity.2D.PixelPerfect;
 --assembly-defines=Unity.TextMeshPro;
+--assembly-defines=Unity.Recorder;
 --assembly-defines=Unity.XR.OpenXR.Features.OculusQuestSupport;
 --assembly-defines=Unity.XR.OpenXR.Features.RuntimeDebugger;
 --assembly-defines=Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary;
 --assembly-defines=Unity.RenderPipelines.Universal.Runtime;
 --assembly-defines=Unity.Burst;
+--assembly-defines=Unity.Recorder.Base;
 --assembly-defines=Unity.2D.Animation.Runtime;
 --assembly-defines=Unity.2D.Tilemap.Extras;
 --assembly-defines=Unity.InternalAPIEngineBridge.001;
@@ -101,11 +103,13 @@ Library: C:\Users\infer\Desktop\unitty\games\Water\Temp\BurstOutput\tempburstlib
 --assembly-defines=Unity.2D.SpriteShape.Runtime;
 --assembly-defines=Unity.2D.PixelPerfect;
 --assembly-defines=Unity.TextMeshPro;
+--assembly-defines=Unity.Recorder;
 --assembly-defines=Unity.XR.OpenXR.Features.OculusQuestSupport;
 --assembly-defines=Unity.XR.OpenXR.Features.RuntimeDebugger;
 --assembly-defines=Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary;
 --assembly-defines=Unity.RenderPipelines.Universal.Runtime;
 --assembly-defines=Unity.Burst;
+--assembly-defines=Unity.Recorder.Base;
 --assembly-defines=Unity.2D.Animation.Runtime;
 --assembly-defines=Unity.2D.Tilemap.Extras;
 --assembly-defines=Unity.InternalAPIEngineBridge.001;

@@ -70,7 +70,7 @@ public class Gyroscope : MonoBehaviour
             float xangle = Vector3.SignedAngle(left, origRot, crossLeftGyro);
             float zangle = Vector3.SignedAngle(up, origRot, crossUpGyro);
 
-             rotQuat = Quaternion.Euler(fore);
+            rotQuat = Quaternion.Euler(fore);
 
             //ox.text = "y angle: " +  yangle;
 
@@ -83,46 +83,54 @@ public class Gyroscope : MonoBehaviour
         }
     }
 
-
     // Update is called once per frame
     void Update()
     {
-        if (doGyro)
+        if (!doGyro)
         {
-            if (gyroOffset.x == 0)
-            {
-                initGyro();
-            }
-
-
-            //checkGyroOnce = false;s
-            //rotQuat = Quaternion.FromToRotation(origRot, Input.gyro.attitude.eulerAngles);
-
-            Quaternion gyro = GyroToUnity(Input.gyro.attitude * gyroOffset/* * Quaternion.Inverse(rotQuat)*/);
-            //gx.text = "X: " + Mathf.Round((gyro.x / Mathf.PI) * 1000f) / 1000f;
-            //gy.text = "Y: " + Mathf.Round((gyro.y / Mathf.PI) * 1000f) / 1000f;
-            //gz.text = "Z: " + Mathf.Round((gyro.z / Mathf.PI) * 1000f) / 1000f;
-            //gw.text = "W: " + Mathf.Round((gyro.w / Mathf.PI) * 1000f) / 1000f;
-            Vector3 tilt = Quaternion.ToEulerAngles(gyro);//newGyro);
-
-            float tiltX = (tilt.x / Mathf.PI);
-            float tiltY = (tilt.y / Mathf.PI);
-            float tiltZ = (tilt.z / Mathf.PI);
-
-            yRotation = tiltY;
-
-            //fx.text = "X: " + Mathf.Round(tiltX * 1000f) / 1000f;
-            //fy.text = "Y: " + Mathf.Round(tiltY * 1000f) / 1000f;
-            //fz.text = "Z: " + Mathf.Round(tiltZ * 1000f) / 1000f;
-
-            //ox.text = "X: " + gyroOffset.x;
-            //oy.text = "Y: " + gyroOffset.y;
-            //oz.text = "Z: " + gyroOffset.z;
-
-            //nx.text = "X: " + gyroOffset.w;
-            //ny.text = "Y: " + Mathf.Round(tilt.y / 180 * 1000f) / 1000f;
-            //nz.text = "Z: " + Mathf.Round(tilt.z / 180 * 1000f) / 1000f;
+            return;
         }
+        
+        if (gyroOffset.x == 0)
+        {
+            initGyro();
+        }
+        float gravityOutputMultiplier = -50;
+        yRotation = Input.gyro.gravity.x;
+
+        // zRot += Input.gyro.rotationRateUnbiased.y;
+        //fy.text = "Y: " + Mathf.Round(yRot * 1000f) / 1000f;
+
+     
+
+        // // //checkGyroOnce = false;s
+        // // //rotQuat = Quaternion.FromToRotation(origRot, Input.gyro.attitude.eulerAngles);
+
+        // // Quaternion gyro = GyroToUnity(Input.gyro.attitude * gyroOffset/* * Quaternion.Inverse(rotQuat)*/);
+        // // // gx.text = "X: " + Mathf.Round((gyro.x / Mathf.PI) * 1000f) / 1000f;
+        // // // gy.text = "Y: " + Mathf.Round((gyro.y / Mathf.PI) * 1000f) / 1000f;
+        // // // gz.text = "Z: " + Mathf.Round((gyro.z / Mathf.PI) * 1000f) / 1000f;
+        // // // gw.text = "W: " + Mathf.Round((gyro.w / Mathf.PI) * 1000f) / 1000f;
+        // // Vector3 tilt = Quaternion.ToEulerAngles(gyro);//newGyro);
+
+        // // float tiltX = (tilt.x / Mathf.PI);
+        // // float tiltY = (tilt.y / Mathf.PI);
+        // // float tiltZ = (tilt.z / Mathf.PI);
+
+        // // yRotation = tiltY;
+
+        // // // fx.text = "X: " + Mathf.Round(tiltX * 1000f) / 1000f;
+        // // // //fy.text = "Y: " + Mathf.Round(tiltY * 1000f) / 1000f;
+        // // fy.text = "Y: " + Mathf.Round(yRotation * 1000f) / 1000f;
+        // // // fz.text = "Z: " + Mathf.Round(tiltZ * 1000f) / 1000f;
+
+        // // // ox.text = "X: " + origRot.x;
+        // // // oy.text = "Y: " + origRot.y;
+        // // //oz.text = "Z: " + (zTilt);
+
+        // // // nx.text = "X: " + gyroOffset.w;
+        // // // ny.text = "Y: " + Mathf.Round(tilt.y / 180 * 1000f) / 1000f;
+        // // // nz.text = "Z: " + Mathf.Round(tilt.z / 180 * 1000f) / 1000f;
     }
 
     private static Quaternion GyroToUnity(Quaternion q)
