@@ -67,10 +67,26 @@ public class SlapTimer : MonoBehaviour
         if(GameVars.isClayDone)
         {
             frameTime = Time.time;
+            //timeBetwSlaps = 0; //onto next level, reset slaps
         }
-        if (Time.time - lastSlapTime >= timeBetwSlaps)
+        if (Time.time - lastSlapTime >= timeBetwSlaps && GameVars.shapeInd != 0)
         {
-            timeBetwSlaps = Random.Range(4, 7);
+            switch(GameVars.shapeInd)
+            {
+                case 1:
+                    timeBetwSlaps = Random.Range(6, 7);
+                    break;
+                case 2:
+                    timeBetwSlaps = Random.Range(4, 7);
+                    break;
+                case 3:
+                    timeBetwSlaps = Random.Range(4, 5);
+                    break;
+                default:
+                    timeBetwSlaps = Random.Range(4, 7);
+                    break;
+            }
+            //timeBetwSlaps = Random.Range(4, 7);
             //Debug.Log("slap");
             GameVars.isInAnim = true;
             frameTime = Time.time;
@@ -79,7 +95,7 @@ public class SlapTimer : MonoBehaviour
         {
             lastSlapTime = Time.time; // in order that the timer doesn't interfere with the slap
 
-            if (Time.time - frameTime >= timeBetwFrames * 8)
+            if (Time.time - frameTime >= timeBetwFrames * 12)
             {
                 if (!GameVars.isInDodge && !GameVars.isClayDone)
                 {
@@ -90,7 +106,7 @@ public class SlapTimer : MonoBehaviour
                 sprRend.sprite = frames[0];
                 GameVars.isInAnim = false;
             }
-            else if (Time.time - frameTime >= timeBetwFrames * 7)
+            else if (Time.time - frameTime >= timeBetwFrames * 11)
             {
                 if (!GameVars.isInDodge && !GameVars.isClayDone && !inSmackPos)
                 {
@@ -100,7 +116,7 @@ public class SlapTimer : MonoBehaviour
                 }
                 sprRend.sprite = frames[3];
             }
-            else if (Time.time - frameTime >= timeBetwFrames * 6)
+            else if (Time.time - frameTime >= timeBetwFrames * 10)
             {
                 sprRend.sprite = frames[2];
                 //whiteScreenColor += new Vector4(0, 0, 0, 0.25f); //0.25

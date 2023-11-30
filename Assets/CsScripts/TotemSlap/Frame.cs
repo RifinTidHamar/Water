@@ -45,7 +45,7 @@ public class Frame : MonoBehaviour
     //static int cellSize = sizeof(int) * (IdPerCell + 1);
     //static int cellCount = 16;
 
-    int clayParticleCount = 256;
+    int clayParticleCount = 128;
     int clayParticleSize = (sizeof(float) * 2) + (sizeof(int) * 2) + (sizeof(int) * 2);
     uint gSizeParticle = 0;
     uint gSizeText = 0;
@@ -98,7 +98,7 @@ public class Frame : MonoBehaviour
         int[,] tmpCell =   {{  -1, -1, -1, 1,/**/ -1, 1, -1, -1,/**/ -1, -1, 1, -1, /**/  1, -1, -1, -1},
                             { -1, -1, -1, -1,/**/ 1, -1, -1, 1,/**/ -1, -1, -1, -1, /**/ 1, -1, -1, 1,},
                             { -1, -1, -1, -1,/**/ -1, 1, 1, -1,/**/ -1, -1, -1, -1, /**/ 1, -1, -1, 1, },
-                            { -1, 1, 1, -1,/**/ -1, -1, -1, -1,/**/ 1, -1, -1, 1, /**/ 1, -1, -1, 1,},
+                            //{ -1, 1, 1, -1,/**/ -1, -1, -1, -1,/**/ 1, -1, -1, 1, /**/ 1, -1, -1, 1,},
                             { -1, -1, -1, 1,/**/ -1, 1, -1, 1,/**/ -1, -1, -1, -1, /**/ 1, 1, -1, 1 } };
 
         // Assuming you want to copy the first row (tmpCell[0]) to emptiedCellsArr

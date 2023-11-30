@@ -2126,7 +2126,7 @@ MonoBehaviour:
   allowBarksDuringConversations: 0
   skipBarkIfNoValidEntries: 0
   cacheBarkLines: 0
-  conversation: afterLog
+  conversation: AfterTotem
   conversationConversant: {fileID: 0}
   conversationActor: {fileID: 0}
   startConversationEntryID: -1
@@ -2953,8 +2953,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moving: 1
-  darkStart: 0.9
-  colPow: 1.34
+  darkStart: 0.83
+  colPow: 1.19
   minS: 7
   maxS: 18
   treeCount: 200
@@ -2962,8 +2962,8 @@ MonoBehaviour:
   leftBound: {fileID: 1927571453}
   rightBound: {fileID: 313003870}
   backBound: {fileID: 401746133}
-  LightEffectCol: {r: 0.79282355, g: 0.7962706, b: 0.879, a: 1}
-  darkCol: {r: 0.0022689083, g: 0, b: 0.1792453, a: 1}
+  LightEffectCol: {r: 0.59607846, g: 0.6, b: 0.75686276, a: 1}
+  darkCol: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &1485343038
 GameObject:
   m_ObjectHideFlags: 0
@@ -3054,7 +3054,7 @@ GameObject:
   - component: {fileID: 1494444153}
   - component: {fileID: 1494444152}
   m_Layer: 0
-  m_Name: Up
+  m_Name: SkyUp
   m_TagString: trail
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

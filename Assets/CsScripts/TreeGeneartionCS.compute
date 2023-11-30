@@ -94,7 +94,7 @@ float inTriangle(float2 curUV, trilygon tri)
 //x: texture x dimension
 //y: texture y dimension
 //z: always 1
-[numthreads(32, 32, 1)]
+[numthreads(16, 16, 1)]
 void barkDraw(uint3 id : SV_DispatchThreadID)
 {
     float2 pos = float2((float2)id.xy / (float)texResolution.x);
@@ -144,7 +144,7 @@ int leafCount;
 //x: texture x dimension
 //y: texture y dimension
 //z: always 1
-[numthreads(32, 32, 1)]
+[numthreads(16, 16, 1)]
 void leafDraw(uint3 id : SV_DispatchThreadID)
 {
     float2 pos = float2((float2)id.xy / (float)texResolution.x);
@@ -170,7 +170,7 @@ void leafDraw(uint3 id : SV_DispatchThreadID)
     }
 }
 
-[numthreads(32, 32, 1)]
+[numthreads(16, 16, 1)]
 void clearTexture(uint3 id : SV_DispatchThreadID)
 {
     treeText[id.xy] = float4(0, 0, 0, 0);

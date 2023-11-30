@@ -39,7 +39,7 @@ float hash11(float p)
 void Clay(uint3 id : SV_DispatchThreadID)
 {
     float4 noCol = float4(0, 0, 0, 0);
-    int ps = 5; // This is the radius of the circle
+    int ps = 8; // This is the radius of the circle
 
     for (int l = -ps; l < ps; l++)
     {

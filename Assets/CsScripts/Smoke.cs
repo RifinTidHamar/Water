@@ -94,7 +94,7 @@ public class Smoke : MonoBehaviour
             float perlinValue3D = noise.snoise(position3D) * texRes;
 
             // Create a new point at the sampled position.
-            Vector3 spawnPosition = new Vector3(x, y + perlinValue3D, z);
+            Vector3 spawnPosition = new Vector3(10, 10, 10);
 
             int spawnX = (int)UnityEngine.Random.Range(0 + quartTexRes, texRes - quartTexRes);
             int spawnY = 0;// (int)UnityEngine.Random.Range(0, texRes);

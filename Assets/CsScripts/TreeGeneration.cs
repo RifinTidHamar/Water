@@ -219,15 +219,15 @@ public class TreeGeneration : MonoBehaviour
 
         mat.SetTexture("_MainTex", outTex);
 
-        textureDraw.Dispatch(barkDrawHandle, 8, 8, 1);
-        textureDraw.Dispatch(leafDrawHandle, 8, 8, 1/*leafCount*/);
+        textureDraw.Dispatch(barkDrawHandle, 16, 16, 1);
+        textureDraw.Dispatch(leafDrawHandle, 16, 16, 1/*leafCount*/);
         leafCount -= adder;
     }
 
    
     private void OnDestroy()
     {
-        textureDraw.Dispatch(clearHandle, 8, 8, 1/*leafCount*/);
+        textureDraw.Dispatch(clearHandle, 16, 16, 1/*leafCount*/);
 
         treeBuff?.Dispose();
 

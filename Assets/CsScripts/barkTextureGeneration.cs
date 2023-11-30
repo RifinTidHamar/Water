@@ -28,7 +28,7 @@ public class barkTextureGeneration : MonoBehaviour
 
         mat.SetTexture("_MainTex", outTex);
 
-        textureDraw.Dispatch(barkDrawHandle, 32, 32, 1);
+        textureDraw.Dispatch(barkDrawHandle, 64, 64, 1);
     }
 
     private void OnDestroy()

@@ -7,7 +7,7 @@
 RWTexture2D<float4> treeText;
 static int2 texResolution = int2(1024, 1024);
 
-[numthreads(32,32,1)]
+[numthreads(16,16,1)]
 void CreateTexture(uint3 id : SV_DispatchThreadID)
 {
     float2 pos = float2((float2) id.xy / (float) texResolution.x);

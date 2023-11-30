@@ -8,6 +8,12 @@ public class gyroPlayerMovement : MonoBehaviour
     public SpriteRenderer sprRend;
     int frameCount;
     float forwardSpeed = 0;
+
+    [SerializeField]
+    float rotationRate;
+
+    [SerializeField]
+    float horizontalMoveRate;
     private void Start()
     {
         frameCount = tiltSprites.Length;
@@ -15,8 +21,8 @@ public class gyroPlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        this.transform.position += new Vector3(Gyroscope.yRotation * Time.deltaTime * 5, 0, forwardSpeed* Time.deltaTime);
-        float normRot = (Gyroscope.yRotation * 2) + 0.5f;
+        this.transform.position += new Vector3(Gyroscope.yRotation * Time.deltaTime * horizontalMoveRate, 0, forwardSpeed* Time.deltaTime);
+        float normRot = (Gyroscope.yRotation * rotationRate) + (rotationRate/2);
         int framSelect = (int)Mathf.Lerp(0, frameCount - 1, normRot);
 
         sprRend.sprite = tiltSprites[framSelect];
