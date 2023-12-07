@@ -7,7 +7,7 @@ public class rotateCameraAround : MonoBehaviour
 {
 
     public Transform target; // The object or point you want to look at.
-    public float rotationSpeed = 200.0f;
+    public float rotationSpeed = -150.0f;
 
     private float horizontalInput;
 

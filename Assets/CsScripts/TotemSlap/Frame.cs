@@ -17,6 +17,9 @@ public class Frame : MonoBehaviour
     public Material mat;
     int clayHandle;
     int checkClearHandle;
+    int redGridHandle;
+
+    int clearTextHandle;
 
     RenderTexture outTex;
     int texRes = 128;
@@ -45,7 +48,7 @@ public class Frame : MonoBehaviour
     //static int cellSize = sizeof(int) * (IdPerCell + 1);
     //static int cellCount = 16;
 
-    int clayParticleCount = 128;
+    int clayParticleCount = 64;
     int clayParticleSize = (sizeof(float) * 2) + (sizeof(int) * 2) + (sizeof(int) * 2);
     uint gSizeParticle = 0;
     uint gSizeText = 0;
@@ -95,11 +98,13 @@ public class Frame : MonoBehaviour
         //int[] tmpCell = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
         //int[] tmpCell = { -1, 1, -1, -1, -1, -1, 1, -1, 1 };
         //int[] tmpCell = { -1, -1, -1, -1, -1, -1, -1, -1, 1 };
-        int[,] tmpCell =   {{  -1, -1, -1, 1,/**/ -1, 1, -1, -1,/**/ -1, -1, 1, -1, /**/  1, -1, -1, -1},
+        int[,] tmpCell =   {{  -1, -1, -1, -1,/**/ -1, -1, -1, -1,/**/ -1, -1, 1, -1, /**/  -1, -1, -1, -1},
+                            {  -1, -1, -1, 1,/**/ -1, -1, -1, -1,/**/ -1, -1, -1, -1, /**/  1, -1, -1, -1},
+                            {  -1, -1, -1, 1,/**/ -1, 1, -1, -1,/**/ -1, -1, 1, -1, /**/  1, -1, -1, -1},
                             { -1, -1, -1, -1,/**/ 1, -1, -1, 1,/**/ -1, -1, -1, -1, /**/ 1, -1, -1, 1,},
                             { -1, -1, -1, -1,/**/ -1, 1, 1, -1,/**/ -1, -1, -1, -1, /**/ 1, -1, -1, 1, },
                             //{ -1, 1, 1, -1,/**/ -1, -1, -1, -1,/**/ 1, -1, -1, 1, /**/ 1, -1, -1, 1,},
-                            { -1, -1, -1, 1,/**/ -1, 1, -1, 1,/**/ -1, -1, -1, -1, /**/ 1, 1, -1, 1 } };
+                            { -1, -1, -1, -1,/**/ -1, 1, -1, 1,/**/ -1, -1, -1, -1, /**/ 1, 1, -1, -1 } };
 
         // Assuming you want to copy the first row (tmpCell[0]) to emptiedCellsArr
         int[] emptiedCellsArr = new int[tmpCell.GetLength(1)];
@@ -144,6 +149,12 @@ public class Frame : MonoBehaviour
         clay.SetBuffer(checkClearHandle, "cPart", clayBuff);
         clay.SetBuffer(checkClearHandle, "emptied", emptyBuff);
 
+        redGridHandle = clay.FindKernel("ColorRedGrid");
+        clay.SetBuffer(redGridHandle, "empC", empC);
+        clay.SetTexture(redGridHandle, "clayText", outTex);
+
+        clearTextHandle = clay.FindKernel("ClearText");
+        clay.SetTexture(clearTextHandle, "clayText", outTex);
 
         //dtID = Shader.PropertyToID("dt");
         mouseID = Shader.PropertyToID("mPos");
@@ -151,8 +162,8 @@ public class Frame : MonoBehaviour
         clay.GetKernelThreadGroupSizes(clayHandle, out gSizeParticle, out _, out _);
         gSizeParticle = (uint)clayParticleCount / gSizeParticle;
 
-        //clay.GetKernelThreadGroupSizes(colorHandle, out gSizeText, out _, out _);
-        //gSizeText = (uint)texRes / gSizeText;
+        clay.GetKernelThreadGroupSizes(clearTextHandle, out gSizeText, out _, out _);
+        gSizeText = (uint)texRes / gSizeText;
 
         mat.SetTexture("_MainTex", outTex);
     }
@@ -160,6 +171,8 @@ public class Frame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        clay.Dispatch(clearTextHandle, (int)gSizeText, (int)gSizeText, 1);
+
         CamToUv camToUv = new CamToUv();
         Vector2 mouseUvPos = camToUv.genMousePosOnImage(firstCamera, plane);
         Vector4 mObjV4 = new Vector4(mouseUvPos.x, mouseUvPos.y, 0, 0);
@@ -186,6 +199,7 @@ public class Frame : MonoBehaviour
         //    GameVars.isClayDone = true;
         //}
 
+        clay.Dispatch(redGridHandle, (int)gSizeText, (int)gSizeText, 1);
         AsyncGPUReadback.Request(emptyBuff, (request) =>
         {
             if (request.hasError)

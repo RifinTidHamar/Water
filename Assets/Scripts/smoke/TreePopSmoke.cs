@@ -67,7 +67,7 @@ public class TreePopSmoke : MonoBehaviour
             // Assign the new rotation to your object.
             
             //curTree.transform.Rotate(new Vector3(0, 180, 0));
-            Debug.Log("loaded");
+            //Debug.Log("loaded");
         }
         inBound = 2f;
         outBound = 7;
@@ -105,7 +105,7 @@ public class TreePopSmoke : MonoBehaviour
             // Assign the new rotation to your object.
 
             //curTree.transform.Rotate(new Vector3(0, 180, 0));
-            Debug.Log("loaded");
+            //Debug.Log("loaded");
         }
     }
 

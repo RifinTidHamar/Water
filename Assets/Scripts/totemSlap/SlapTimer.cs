@@ -69,18 +69,21 @@ public class SlapTimer : MonoBehaviour
             frameTime = Time.time;
             //timeBetwSlaps = 0; //onto next level, reset slaps
         }
-        if (Time.time - lastSlapTime >= timeBetwSlaps && GameVars.shapeInd != 0)
+        if (Time.time - lastSlapTime >= timeBetwSlaps && GameVars.shapeInd > 2)
         {
             switch(GameVars.shapeInd)
             {
-                case 1:
+                case 3:
                     timeBetwSlaps = Random.Range(6, 7);
                     break;
-                case 2:
+                case 4:
                     timeBetwSlaps = Random.Range(4, 7);
                     break;
-                case 3:
+                case 5:
                     timeBetwSlaps = Random.Range(4, 5);
+                    break;
+                case 6:
+                    timeBetwSlaps = Random.Range(3, 4);
                     break;
                 default:
                     timeBetwSlaps = Random.Range(4, 7);

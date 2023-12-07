@@ -79,7 +79,7 @@ public class Smoke : MonoBehaviour
         outTex.Create();
 
         smokeArr = new smokeParticle[smokeParticleCount];
-        int quartTexRes = 0;// texRes / 0;
+        int quartTexRes = texRes / 2;
 
         for (int i = 0; i < smokeParticleCount; i++)
         {
@@ -94,12 +94,12 @@ public class Smoke : MonoBehaviour
             float perlinValue3D = noise.snoise(position3D) * texRes;
 
             // Create a new point at the sampled position.
-            Vector3 spawnPosition = new Vector3(10, 10, 10);
+            Vector3 spawnPosition = new Vector3(x, y + perlinValue3D, z);
 
             int spawnX = (int)UnityEngine.Random.Range(0 + quartTexRes, texRes - quartTexRes);
             int spawnY = 0;// (int)UnityEngine.Random.Range(0, texRes);
             int spawnZ = (int)UnityEngine.Random.Range(0 + quartTexRes, texRes - quartTexRes);
-            float3 noiseInp = new float3(spawnX, spawnY, spawnZ);
+            float2 noiseInp = new float2(spawnX, spawnZ);
             int spawn = (int)(noise.snoise(noiseInp) * (float)texRes);
 
             smPart.position = new Vector3Int(spawnX, spawn, spawnZ);
