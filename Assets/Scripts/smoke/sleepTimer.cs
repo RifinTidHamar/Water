@@ -11,6 +11,9 @@ public class sleepTimer : MonoBehaviour
     float timeBetwBlink;
     public Button blinkButton;
     public Button sleepText;
+
+    public Button gameOverText;
+
     float timeSinceEnabledSleepText;
     bool enableSleepText;
     public GameObject blinkPlane;
@@ -53,6 +56,7 @@ public class sleepTimer : MonoBehaviour
         if(enableSleepText && Time.time - timeSinceEnabledSleepText >= 2)
         {
             sleepText.interactable = true;
+            gameOverText.interactable = true;
         }
     }
 
