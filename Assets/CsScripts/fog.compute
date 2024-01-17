@@ -1,0 +1,233 @@
+#pragma kernel attractP
+#pragma kernel detractP
+#pragma kernel wallP
+#pragma kernel finalP
+#pragma kernel bigP
+#pragma kernel SmoothPath
+#pragma kernel Blur
+
+#include "noiseSimplex.cginc"
+#pragma enable_d3d11_debug_symbols
+
+RWTexture3D<float4> smokeText;
+
+float4 mPos; //mouse pos
+float4 rDir; //rayDirection
+float4 wSpace; //world space of the cubeOrigin
+
+int texRes; //resoultion of the texture
+static float dt = 0.025;
+float time;
+int pCnt; //total particles in the simulation
+
+//int cCnt;//total number of cells in the table
+//int idPCell;//max ids in a cell
+
+//struct cell
+//{
+//    int cPart[511];//when changing this value, also change argument for calcNFree as well as the cellCount in the c# scirpt
+//    int nFree;
+//};
+
+
+struct smokeParticle
+{
+    float3 vel;
+    float3 dVel;
+    float3 mVel;
+    float uSpeed;
+    int3 pos;
+    int id;
+    int3 cInd;
+};
+
+
+RWStructuredBuffer<smokeParticle> smp; //smoke particles
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+        //p -= 0.5;
+    return p;
+}
+
+float3 calcVel(float3 pos2, float3 pos, float attrCof)
+{
+    //float dst = abs(distance(pos, pos2));
+    //float attr = 1 / dst * 20; //
+    //float3 direction = normalize(pos2 - pos);
+    //return direction * -25;
+    
+    float dst = abs(distance(pos, pos2));
+    float attr = (1 / dst) / attrCof;
+    float3 direction = normalize(pos2 - pos);
+    return direction * -attr; //attrXYZ;
+}
+
+[numthreads(64,1,1)]
+void attractP(uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = float3((float3) smp[id.x].pos / (float) texRes);
+    float attrCof = pCnt / 40; //80
+    //smp[id.x].vel =0;
+
+    //bring particles closer
+    for (int i = 0; i < pCnt; i++)
+    {
+        if (id.x == (uint) i)
+            continue;
+        float3 pos2 = float3((float3) smp[i].pos / (float) texRes);
+        float dst = abs(distance(pos, pos2));
+        if (dst < 0.3 /*|| dst > 0.5*/)
+            continue;
+        float attr = dst;
+        float3 direction = normalize(pos2 - pos);
+        float3 attrXYZ = float3(attr, attr * 0.05, attr);
+        smp[id.x].vel += direction * attr; //attrXYZ;
+    }
+    smp[id.x].vel /= clamp(smp[id.x].vel, -50, 50);
+}
+
+[numthreads(64,1,1)]
+void detractP(uint3 id : SV_DispatchThreadID)
+{   
+    float3 pos = float3((float3) smp[id.x].pos / (float) texRes);
+    float attrCof = pCnt / 40; //80
+    //push particles apart
+    //smp[id.x].dVel = 0;
+
+    for (int i = 0; i < pCnt; i++)
+    {
+        if (id.x == (uint) i)
+            continue;
+        float3 pos2 = float3((float3) smp[i].pos / (float) texRes);
+        float dst = distance(pos2, pos);
+        
+        if (dst > 0.09)
+            continue;
+        float3 direction = normalize(pos2 - pos);
+        smp[id.x].dVel += direction * -700 * dt;
+    }
+    smp[id.x].dVel /= clamp(smp[id.x].dVel, -50, 50);
+
+}
+
+[numthreads(64,1,1)]
+void wallP(uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = float3((float3) smp[id.x].pos / (float) texRes);
+    float attrCof = pCnt / 40; //80
+    float h = 0.9;
+    float l = 0.1;
+    
+    if (pos.x > h)
+    {
+        //float3 pos2 = float3(1, pos.y, pos.z);
+        pos.x = h;
+       //smp[id.x].mVel += calcVel(pos2, pos, attrCof);
+    }
+    if (pos.x < l)
+    {
+        //float3 pos2 = float3(0, pos.y, pos.z);
+        pos.x = l;
+        //smp[id.x].mVel += calcVel(pos2, pos, attrCof);
+    }
+    if (pos.y > h)
+    {
+        //float3 pos2 = float3(pos.x, 1, pos.z);
+        pos.y = h;
+        //smp[id.x].mVel += calcVel(pos2, pos, attrCof);
+    }
+    if (pos.y < l)
+    {
+        //float3 pos2 = float3(pos.x, 0, pos.z);
+        pos.y = l;
+        //smp[id.x].mVel += calcVel(pos2, pos, attrCof);
+    }
+    if (pos.z > h)
+    {
+        //float3 pos2 = float3(pos.x, pos.y, 1);
+        pos.z = h;
+        //smp[id.x].mVel += calcVel(pos2, pos, attrCof);
+    }
+    if (pos.z < l)
+    {
+        //float3 pos2 = float3(pos.x, pos.y, 0);
+        pos.z = l;
+        //smp[id.x].mVel += calcVel(pos2, pos, attrCof);
+    }
+    
+    //smp[id.x].mVel /= 1 + (dt * 0.01);
+    //smp[id.x].mVel = clamp(smp[id.x].mVel, -50, 50);
+    smp[id.x].pos = round(pos * texRes);
+}
+
+[numthreads(64,1,1)]
+void finalP(uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = float3((float3) smp[id.x].pos / (float) texRes);
+
+    //wind
+    float tvs = time * 0.05 + (smp[id.x].id); //time val small
+    float tvb = (time * 0.7) + 0.2;
+    
+    float noiseVal = snoise(pos.xyz * 7 + tvs) * 1; //smallnoise
+    noiseVal += (snoise(pos.xyz * 2 + tvb)) * 1; //big noise
+    int s = sign(noiseVal);
+    float invNoise = (1 - noiseVal);
+    float RorA = invNoise * (pos.y + 0.5); 
+    //wind
+    
+    //gravity
+    smp[id.x].vel.y -= 0.2;
+   
+    pos += (smp[id.x].mVel + smp[id.x].vel + smp[id.x].dVel) * 0.01 * dt;// * noiseVal;
+
+    smp[id.x].pos = round(pos * texRes);
+    
+}
+
+[numthreads(64,1,1)]
+void bigP(uint3 id : SV_DispatchThreadID)
+{
+    int ps = 2;
+    for (int l = -ps; l < ps; l++)
+    {
+        for (int h = -ps; h < ps; h++)
+        {
+            for (int w = -ps; w < ps; w++)
+            {
+                smokeText[smp[id.x].pos.xyz + int3(l, h, w)] = float4(1, 1, 1, 1);
+            }
+        }
+    }
+}
+
+static int kSize = 2;
+
+[numthreads(8, 8, 8)]
+void SmoothPath(uint3 id : SV_DispatchThreadID)
+{
+    smokeText[id.xyz] -= 0.02;
+}
+
+[numthreads(8, 8, 8)]
+void Blur(uint3 id : SV_DispatchThreadID)
+{
+    float4 result = float4(0, 0, 0, 0);
+
+    for (int x = -kSize; x <= kSize; x++)
+    {
+        for (int y = -kSize; y <= kSize; y++)
+        {
+            for (int z = -kSize; z <= kSize; z++)
+            {
+                result += smokeText[id.xyz + int3(x, y, z)] / float(pow(2 * kSize + 1, 3));
+            }
+        }
+    }
+    smokeText[id.xyz] = result;
+}

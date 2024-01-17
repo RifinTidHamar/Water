@@ -115,6 +115,8 @@ void Clay(uint3 id : SV_DispatchThreadID)
         vel += float2(0, -1) * -10 * dt;
     }
     
+    //vel.y -= 0.1;
+    
     pos += vel;
     
     

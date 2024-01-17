@@ -35,6 +35,7 @@ MonoBehaviour:
   features: []
   m_renderMode: 1
   m_depthSubmissionMode: 0
+  m_symmetricProjection: 0
 --- !u!114 &-8145555849211815827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,6 +96,22 @@ MonoBehaviour:
   company: Unity
   priority: 0
   required: 0
+--- !u!114 &-7574900212936811590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a1f07dc5afe854f9f12a4194aca3fb, type: 3}
+  m_Name: WebGL
+  m_EditorClassIdentifier: 
+  features: []
+  m_renderMode: 1
+  m_depthSubmissionMode: 0
+  m_symmetricProjection: 0
 --- !u!114 &-7188696611558456436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,6 +143,7 @@ MonoBehaviour:
   - {fileID: -640468438361069344}
   m_renderMode: 0
   m_depthSubmissionMode: 0
+  m_symmetricProjection: 0
 --- !u!114 &-6334379759836044401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,6 +235,7 @@ MonoBehaviour:
   - {fileID: 757189428174284358}
   m_renderMode: 1
   m_depthSubmissionMode: 0
+  m_symmetricProjection: 0
 --- !u!114 &-2277214760474904505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,11 +371,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f0ebc320a151d3408ea1e9fce54d40e, type: 3}
   m_Name: OpenXR Package Settings
   m_EditorClassIdentifier: 
-  Keys: 010000000700000004000000
+  Keys: 0100000007000000040000000d000000
   Values:
   - {fileID: -7188696611558456436}
   - {fileID: -4226135025231003416}
   - {fileID: -8156494115199777478}
+  - {fileID: -7574900212936811590}
 --- !u!114 &757189428174284358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,6 +697,10 @@ MonoBehaviour:
     manifestName: cambria
     enabled: 1
   forceRemoveInternetPermission: 1
+  symmetricProjection: 0
+  systemSplashScreen: {fileID: 0}
+  lateLatchingMode: 0
+  lateLatchingDebug: 0
 --- !u!114 &6871534582898611830
 MonoBehaviour:
   m_ObjectHideFlags: 0
