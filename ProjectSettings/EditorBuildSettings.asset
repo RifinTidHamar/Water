@@ -23,9 +23,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/TotemMake.unity
     guid: 92c133dc8e38cf24aac8cce006b4cb2a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/shadowWall.unity
     guid: d5d6bcd4ae347184f91b230dcdae06f9
+  - enabled: 1
+    path: Assets/Scenes/cloudValley.unity
+    guid: 9de9bf3f6f3101c40b69c2d098ae5aad
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2f592624c4ded6141b0d03fe234e3ec2, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 9ca6d084c3c33c8488cbe89115e4a52b, type: 2}

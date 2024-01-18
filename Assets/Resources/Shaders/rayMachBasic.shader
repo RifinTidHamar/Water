@@ -16,7 +16,7 @@ Shader "Unlit/rayMarchBasic"
         SubShader
         {
             Tags {"Queue" = "Transparent"}
-            Blend One One
+            Blend SrcAlpha OneMinusSrcAlpha
             Cull Off
             Pass
             {
@@ -102,7 +102,11 @@ Shader "Unlit/rayMarchBasic"
         
                         rayOrigin += _StepSize * worldRayDirection;
                     }
-                    backCol.rgb *= _Color;
+                    backCol.rgb *= _Color.rgb;
+
+                    backCol.a = (backCol.a - 0.51) * 2 + 0.25;
+                    backCol.rbg = (backCol.rgb - 0.5) * 1.2 + 0.5;
+
                     return backCol;
                 }
                 ENDCG

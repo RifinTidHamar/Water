@@ -25,7 +25,7 @@ public class fog : MonoBehaviour
     int tableHandle;
     int blurHandle;
     RenderTexture outTex;
-    int texRes = 64;
+    int texRes = 128;
 
     //struct cell
     //{
@@ -53,7 +53,7 @@ public class fog : MonoBehaviour
     //static int cellSize = sizeof(int) * (IdPerCell + 1);
     //static int cellCount = 16;
 
-    int smokeParticleCount = 512;
+    int smokeParticleCount = 64;
     int smokeParticleSize = (sizeof(float) * 3) * 3 + (sizeof(float) * 1) + (sizeof(int) * 3) * 2 + (sizeof(int) * 1);
     uint gSizeParticle = 0;
     uint gSizeText = 0;

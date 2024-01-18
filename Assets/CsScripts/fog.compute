@@ -1,4 +1,4 @@
-#pragma kernel attractP
+﻿#pragma kernel attractP
 #pragma kernel detractP
 #pragma kernel wallP
 #pragma kernel finalP
@@ -16,7 +16,7 @@ float4 rDir; //rayDirection
 float4 wSpace; //world space of the cubeOrigin
 
 int texRes; //resoultion of the texture
-static float dt = 0.025;
+static float dt = 0.04;
 float time;
 int pCnt; //total particles in the simulation
 
@@ -88,7 +88,7 @@ void attractP(uint3 id : SV_DispatchThreadID)
         float3 attrXYZ = float3(attr, attr * 0.05, attr);
         smp[id.x].vel += direction * attr; //attrXYZ;
     }
-    smp[id.x].vel /= clamp(smp[id.x].vel, -50, 50);
+    smp[id.x].vel = clamp(smp[id.x].vel, -50, 50);
 }
 
 [numthreads(64,1,1)]
@@ -111,7 +111,7 @@ void detractP(uint3 id : SV_DispatchThreadID)
         float3 direction = normalize(pos2 - pos);
         smp[id.x].dVel += direction * -700 * dt;
     }
-    smp[id.x].dVel /= clamp(smp[id.x].dVel, -50, 50);
+    smp[id.x].dVel = clamp(smp[id.x].dVel, -50, 50);
 
 }
 
@@ -182,7 +182,7 @@ void finalP(uint3 id : SV_DispatchThreadID)
     //wind
     
     //gravity
-    smp[id.x].vel.y -= 0.2;
+    //smp[id.x].vel.y -= 0.2;
    
     pos += (smp[id.x].mVel + smp[id.x].vel + smp[id.x].dVel) * 0.01 * dt;// * noiseVal;
 
@@ -193,20 +193,24 @@ void finalP(uint3 id : SV_DispatchThreadID)
 [numthreads(64,1,1)]
 void bigP(uint3 id : SV_DispatchThreadID)
 {
-    int ps = 2;
+    int ps = 3;
     for (int l = -ps; l < ps; l++)
     {
         for (int h = -ps; h < ps; h++)
         {
             for (int w = -ps; w < ps; w++)
             {
-                smokeText[smp[id.x].pos.xyz + int3(l, h, w)] = float4(1, 1, 1, 1);
+                float hyp = sqrt(l * l + h * h + w * w);
+                if (hyp <= ps)
+                {
+                    smokeText[smp[id.x].pos.xyz + int3(l, h, w)] = float4(1, 1, 1, 1);
+                }
             }
         }
     }
 }
 
-static int kSize = 2;
+static int kSize = 4;
 
 [numthreads(8, 8, 8)]
 void SmoothPath(uint3 id : SV_DispatchThreadID)
