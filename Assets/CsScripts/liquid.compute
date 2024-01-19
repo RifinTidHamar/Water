@@ -15,11 +15,24 @@ struct SPHParticle
     float pressure;
 };
 
+struct MeshTriangle
+{
+    float3 p1WPos;
+    float3 p2WPos;
+    float3 p3WPos;
+    float3 normal;
+    float3 tangent;
+    float3 binormal; 
+};
+
 
 RWStructuredBuffer<SPHParticle> particles;
+StructuredBuffer<MeshTriangle> tris;
 RWTexture3D<float4> liqText;
 
 //Passed from SPHFluid.cs
+int triCount;
+
 int particleCount;
 int colliderCount;
 int texRes;
@@ -41,6 +54,47 @@ float3 penetrationPosition;
 
 #define PI 3.1415926536
 #define PARTICLETHREADCOUNT 64
+#define eps 0.01
+
+bool Intersect(MeshTriangle tri, float3 position)
+{
+    bool inter = false;
+    float3 colliderProjection = tri.p1WPos - position;
+
+    penetrationLength = abs(dot(colliderProjection, tri.normal)) - (radius / 2.0);
+    penetrationPosition = position;
+
+    if (penetrationLength < 0.0)
+    {
+        float2 p1 = tri.p1WPos;
+        float2 p2 = tri.p2WPos;
+        float2 p3 = tri.p3WPos;
+
+        float a = ((p2.y - p3.y) * (position.x - p3.x) + (p3.x - p2.x) * (position.y - p3.y)) / ((p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y));
+        float b = ((p3.y - p1.y) * (position.x - p3.x) + (p1.x - p3.x) * (position.y - p3.y)) / ((p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y));
+        float c = 1 - a - b;
+        if (0 - eps <= a && a <= 1 + eps && 0 - eps <= b && b <= 1 + eps && 0 - eps <= c && c <= 1 + eps)
+        {
+            inter = true;
+        }
+    }
+    return inter;
+}
+
+float3 DampVelocity(MeshTriangle tri, float3 velocity, float drag)
+{
+    float3 newVelocity = dot(velocity, penetrationNormal) * penetrationNormal * damping
+                    + dot(velocity, tri.tangent) * tri.tangent * drag
+                    + dot(velocity, tri.binormal) * tri.binormal * drag;
+
+    float3 forward = float3(0, 0, 1);
+    float3 right = float3(1, 0, 0);
+    float3 up = float3(0, 1, 0);
+
+    return dot(newVelocity, forward) * forward
+            + dot(newVelocity, right) * right
+            + dot(newVelocity, up) * up;
+}
 
 [numthreads(PARTICLETHREADCOUNT, 1, 1)]
 void ComputeDensityPressure(uint3 id : SV_DispatchThreadID)
@@ -154,7 +208,7 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
     if (particles[id.x].position.y < l)
     {
         particles[id.x].velocity = DampVelocity(f, r, u, particles[id.x].velocity, 1.0 - particleDrag);
-        particles[id.x].position.y = l; // - penetrationNormal; // * abs(penetrationLength);
+        particles[id.x].position.y = h; // - penetrationNormal; // * abs(penetrationLength);
     }
     if (particles[id.x].position.z > h)
     {
@@ -165,6 +219,14 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
     {
         particles[id.x].velocity = DampVelocity(u, r, f, particles[id.x].velocity, 1.0 - particleDrag);
         particles[id.x].position.z = l; // - penetrationNormal; // * abs(penetrationLength);
+    }
+    for (int i = 0; i < triCount; i++)
+    {
+        if (Intersect(tris[i], particles[id.x].position))
+        {
+            particles[id.x].velocity = DampVelocity(tris[i], particles[id.x].velocity, 1.0 - particleDrag);
+            particles[id.x].position = penetrationPosition - tris[i].normal * abs(penetrationLength);
+        }
     }
 }
 

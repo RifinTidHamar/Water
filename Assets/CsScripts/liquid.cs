@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.XR;
+using static Unity.Burst.Intrinsics.X86.Avx;
 
 public class liquid : MonoBehaviour
 {
@@ -25,7 +28,19 @@ public class liquid : MonoBehaviour
             pressure = 0.0f;
         }
     }
+
+    struct MeshTriangle
+    {
+        public Vector3 p1WPos;
+        public Vector3 p2WPos;
+        public Vector3 p3WPos;
+        public Vector3 normal;
+        public Vector3 tangent;
+        public Vector3 binormal;
+    };
+
     int SIZE_SPHPARTICLE = 11 * sizeof(float);
+    int sizeTri = (sizeof(float) * 3) * 6;
 
     public float particleRadius = 1;
     public float smoothingRadius = 1;
@@ -35,6 +50,8 @@ public class liquid : MonoBehaviour
     public float particleDrag = 0.025f;
     public int particleCount = 8000;
     public int rowSize = 100;
+    public Mesh mesh;
+    public Transform meshTransform;
 
     int texRes = 64;
     RenderTexture outTex;
@@ -54,6 +71,10 @@ public class liquid : MonoBehaviour
     SPHParticle[] particlesArray;
     ComputeBuffer particlesBuffer;
 
+    MeshTriangle[] triangleArr;
+    ComputeBuffer triangleBuffer;
+    int meshTriangleNum;
+
     int kernelComputeDensityPressure;
     int kernelComputeForces;
     int kernelIntegrate;
@@ -69,6 +90,7 @@ public class liquid : MonoBehaviour
 
     private void Start()
     {
+        initTriArr();
         InitSPH();
         InitShader();
     }
@@ -83,8 +105,8 @@ public class liquid : MonoBehaviour
         shader.Dispatch(kernelBlur, texGSize, texGSize, texGSize);
         shader.Dispatch(kernelSmoothPath, texGSize, texGSize, texGSize);
         Vector3 g = Input.gyro.gravity;
-        float gMul = 2;
-        GRAVITY = new Vector4(g.z * -gMul, g.y * gMul, g.x * -gMul, 2000);
+        float gMul = 5;
+        GRAVITY = new Vector4(g.z * -gMul/2, g.y * gMul, g.x * -gMul/2, 2000);
         shader.SetVector(gravityID, GRAVITY);
     }
 
@@ -113,7 +135,10 @@ public class liquid : MonoBehaviour
 
         particlesBuffer = new ComputeBuffer(particlesArray.Length, SIZE_SPHPARTICLE);
         particlesBuffer.SetData(particlesArray);
+        triangleBuffer = new ComputeBuffer(meshTriangleNum, sizeTri);
+        triangleBuffer.SetData(triangleArr);
 
+        shader.SetInt("triCount", meshTriangleNum);
         shader.SetInt("particleCount", particlesArray.Length);
         shader.SetInt("texRes", texRes);
         shader.SetFloat("smoothingRadius", smoothingRadius);
@@ -128,6 +153,7 @@ public class liquid : MonoBehaviour
         shader.SetFloat("deltaTime", DT);
         shader.SetVector("gravity", GRAVITY);
 
+        shader.SetBuffer(kernelComputeColliders, "tris", triangleBuffer);
         shader.SetBuffer(kernelComputeDensityPressure, "particles", particlesBuffer);
         shader.SetBuffer(kernelComputeForces, "particles", particlesBuffer);
         shader.SetBuffer(kernelIntegrate, "particles", particlesBuffer);
@@ -138,6 +164,45 @@ public class liquid : MonoBehaviour
         shader.SetTexture(kernelSmoothPath, "liqText", outTex);
 
         material.SetTexture("_MainTex", outTex);
+    }
+
+    private void initTriArr()
+    {
+        Vector3[] worldVerts = new Vector3[mesh.vertices.Length];
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            //worldVerts[i] = new Vector4(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z, 1);
+            worldVerts[i] = meshTransform.localToWorldMatrix.MultiplyVector(mesh.vertices[i]);
+        }
+        meshTriangleNum = mesh.triangles.Length / 3;
+        //mesh.triangles[0];
+        //Debug.Log(meshTriangleNum);
+        triangleArr = new MeshTriangle[meshTriangleNum];
+        int[] vertIndices = mesh.triangles;
+        /*for(int i = 0; i < vertIndices.Length; i++)
+        {
+            Debug.Log(vertIndices[i]);
+        }*/
+        //Debug.Log(vertIndices.Length / 3);
+        //Debug.Log(mesh.uv.Length);
+        for (int i = 0; i < meshTriangleNum; i++)
+        {
+            int vCount = i * 3;
+            Vector3 v1 = worldVerts[vertIndices[vCount + 0]];
+            Vector3 v2 = worldVerts[vertIndices[vCount + 1]];
+            Vector3 v3 = worldVerts[vertIndices[vCount + 2]];
+            triangleArr[i].p1WPos = v1;
+            triangleArr[i].p2WPos = v2;
+            triangleArr[i].p3WPos = v3;
+
+            triangleArr[i].normal = -mesh.normals[vertIndices[vCount + 0]];
+
+            triangleArr[i].tangent = mesh.tangents[vertIndices[vCount + 0]];
+
+            triangleArr[i].binormal = Vector3.Cross(triangleArr[i].normal, triangleArr[i].tangent);
+
+            //Debug.Log(triangleArr[i].p1Uv + " " + triangleArr[i].p2Uv + " " + triangleArr[i].p3Uv);
+        }
     }
 
     private void InitSPH()
@@ -156,9 +221,9 @@ public class liquid : MonoBehaviour
         for (int i = 0; i < amount; i++)
         {
             Vector3 pos = new Vector3();
-            pos.x = (i % rowSize) + Random.Range(-0.1f, 0.1f) - center;
+            pos.x = (i % rowSize) + UnityEngine.Random.Range(-0.1f, 0.1f) - center;
             pos.y = 2 + (float)((i / rowSize) / rowSize) * 1.1f;
-            pos.z = ((i / rowSize) % rowSize) + Random.Range(-0.1f, 0.1f) - center;
+            pos.z = ((i / rowSize) % rowSize) + UnityEngine.Random.Range(-0.1f, 0.1f) - center;
             pos *= particleRadius;
 
             particlesArray[i] = new SPHParticle(pos);

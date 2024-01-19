@@ -1,3 +1,5 @@
+#warning Upgrade NOTE: unity_Scale shader variable was removed; replaced '_WorldSpaceCameraPos.w' with '1.0'
+
 Shader "Unlit/rayMarchBasic"
 {
     Properties
@@ -65,9 +67,9 @@ Shader "Unlit/rayMarchBasic"
                     //o.objectVertex.y /= 256;
                     //float4 newVert = float4(v.vertex.x, o.objectVertex.y, v.vertex.zw);
                     // Calculate vector from camera to vertex in world space
-                    float3 worldVertex = o.objectVertex * 1.5; //*2 will need to be change to whatever object scale is
+                    float3 worldVertex = o.objectVertex * 30 + float3(0,5,0); //*2 will need to be change to whatever object scale is
                     //o.objectVertex = worldVertex;
-                    o.rayDirection = worldVertex - _WorldSpaceCameraPos;
+                    o.rayDirection = worldVertex - _WorldSpaceCameraPos;;
                     //o.rayDirection.y /= 5;
                     o.vertex = mul(UNITY_MATRIX_VP, float4(worldVertex, 1));
                     return o;
@@ -86,7 +88,7 @@ Shader "Unlit/rayMarchBasic"
                 {
                     float4 backCol = float4(0, 0, 0, 0);
                     //the ray orging is the linearly interpolated vertex position calculated in the vertex shader
-                    float3 rayOrigin = mul(unity_ObjectToWorld, i.objectVertex ) / 1.5 + 0.5; //  + float3(_TestX, _TestY, _TestZ)+ 0.5;
+                    float3 rayOrigin = mul(unity_ObjectToWorld, i.objectVertex ) / 30 + 0.5; //  + float3(_TestX, _TestY, _TestZ)+ 0.5;
                     //rayOrigin += _WorldSpaceCameraPos;
                     float3 worldRayDirection = normalize(i.rayDirection);// (unity_WorldToObject, float4(normalize(i.rayDirection), 1));
                      
