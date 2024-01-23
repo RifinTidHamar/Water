@@ -116,7 +116,7 @@ Shader "Unlit/rayMarchBasic"
                         rayOrigin += _StepSize * worldRayDirection;
                         unalteredRay += _StepSize * worldRayDirection;
                     }
-                    //backCol.rgb *= _Color.rgb;
+                    backCol.rgb *= _Color.rgb;
 
                     float4 newCol = backCol;
 

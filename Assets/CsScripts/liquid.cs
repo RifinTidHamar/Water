@@ -61,7 +61,7 @@ public class liquid : MonoBehaviour
 
     // Consts
     private Vector4 GRAVITY = new Vector4(0, 9.81f, 0.0f, 2000.0f);
-    private const float DT = 0.0008f;
+    private const float DT = 0.00016f; //the lower the slower
     private const float BOUND_DAMPING = -0.5f;
     const float GAS = 2000.0f;
 
@@ -106,7 +106,7 @@ public class liquid : MonoBehaviour
         shader.Dispatch(kernelSmoothPath, texGSize, texGSize, texGSize);
         Vector3 g = Input.gyro.gravity;
         float gMul = -9.81f;
-        GRAVITY = new Vector4(g.z * gMul*5, gMul, g.x * gMul, 2000);
+        GRAVITY = new Vector4(g.z * gMul*3, gMul, g.x * gMul, 2000);
         //GRAVITY = new Vector4( 0, gMul, 0, 2000);
         shader.SetVector(gravityID, GRAVITY);
     }

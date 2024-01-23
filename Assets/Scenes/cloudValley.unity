@@ -207,37 +207,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
---- !u!1 &486758971
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 486758972}
-  m_Layer: 0
-  m_Name: cams
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &486758972
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 486758971}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.03604602, y: 0.4431716, z: 0.07261425, w: 0.89276356}
-  m_LocalPosition: {x: -30.1, y: 16.4, z: 44.7}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 52.8, z: 9.3}
 --- !u!4 &555119306 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8be1a060b721ed747ae4f02eec5cb5cc, type: 3}
@@ -363,12 +332,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   particleRadius: 1
   smoothingRadius: 1
-  restDensity: 15
-  particleMass: 0.1
-  particleViscosity: 1.5
-  particleDrag: 0.1
-  particleCount: 256
-  rowSize: 20
+  restDensity: 4
+  particleMass: 0.03
+  particleViscosity: 0.7
+  particleDrag: 0.01
+  particleCount: 1024
+  rowSize: 100
   mesh: {fileID: -462981019419857548, guid: 8be1a060b721ed747ae4f02eec5cb5cc, type: 3}
   meshTransform: {fileID: 555119306}
   shader: {fileID: 7200000, guid: 0072ab7f787aeb741ba0e6f3a1f6fb05, type: 3}
@@ -405,7 +374,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 0
+  m_RenderShadows: 1
   m_RequiresDepthTextureOption: 1
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
@@ -473,7 +442,7 @@ Camera:
   field of view: 12.7
   orthographic: 0
   orthographic size: 6.85
-  m_Depth: -1
+  m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -485,7 +454,7 @@ Camera:
   m_AllowMSAA: 1
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 0
+  m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!4 &914236415
@@ -1191,6 +1160,5 @@ SceneRoots:
   - {fileID: 1384945203}
   - {fileID: 1189003212}
   - {fileID: 914236415}
-  - {fileID: 486758972}
   - {fileID: 571162753}
   - {fileID: 2019562387}
