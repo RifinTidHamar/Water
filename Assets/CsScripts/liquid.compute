@@ -213,12 +213,12 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
     if (particles[id.x].position.z > h)
     {
         particles[id.x].velocity = DampVelocity(u, r, -f, particles[id.x].velocity, 1.0 - particleDrag);
-        particles[id.x].position.z = h; // - penetrationNormal; // * abs(penetrationLength);
+        particles[id.x].position.z = l; // - penetrationNormal; // * abs(penetrationLength);
     }
     if (particles[id.x].position.z < l)
     {
         particles[id.x].velocity = DampVelocity(u, r, f, particles[id.x].velocity, 1.0 - particleDrag);
-        particles[id.x].position.z = l; // - penetrationNormal; // * abs(penetrationLength);
+        particles[id.x].position.z = h; // - penetrationNormal; // * abs(penetrationLength);
     }
     for (int i = 0; i < triCount; i++)
     {
@@ -234,7 +234,8 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
 void putIntoTexture(uint3 id : SV_DispatchThreadID)
 {
     float3 pos = round(((particles[id.x].position / 25) + 0.5) * texRes);
-    int ps = 2;
+    int ps = 1;
+    //replace "0" with -ps for full blur
     for (int l = -ps; l < ps; l++)
     {
         for (int h = -ps; h < ps; h++)
@@ -251,7 +252,7 @@ void putIntoTexture(uint3 id : SV_DispatchThreadID)
     }
 }
 
-static int kSize = 0;
+static int kSize = 1;
 
 [numthreads(8, 8, 8)]
 void SmoothPath(uint3 id : SV_DispatchThreadID)
