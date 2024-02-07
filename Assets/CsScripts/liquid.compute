@@ -192,7 +192,7 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
     
     if (particles[id.x].position.x > h)
     {
-        particles[id.x].velocity = DampVelocity(u, f, -r, particles[id.x].velocity, 1.0 - particleDrag);
+        particles[id.x].velocity = DampVelocity(u, f, r, particles[id.x].velocity, 1.0 - particleDrag);
         particles[id.x].position.x = h;// - penetrationNormal; // * abs(penetrationLength);
     }
     if (particles[id.x].position.x < l)
@@ -213,12 +213,12 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
     if (particles[id.x].position.z > h)
     {
         particles[id.x].velocity = DampVelocity(u, r, -f, particles[id.x].velocity, 1.0 - particleDrag);
-        particles[id.x].position.z = h; // - penetrationNormal; // * abs(penetrationLength);
+        particles[id.x].position.z = l; // - penetrationNormal; // * abs(penetrationLength);
     }
     if (particles[id.x].position.z < l)
     {
         particles[id.x].velocity = DampVelocity(u, r, f, particles[id.x].velocity, 1.0 - particleDrag);
-        particles[id.x].position.z = l; // - penetrationNormal; // * abs(penetrationLength);
+        particles[id.x].position.z = h; // - penetrationNormal; // * abs(penetrationLength);
     }
     for (int i = 0; i < triCount; i++)
     {
@@ -234,6 +234,9 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
 void putIntoTexture(uint3 id : SV_DispatchThreadID)
 {
     float3 pos = round(((particles[id.x].position / 25) + 0.5) * texRes);
+    float4 col = float4(1, 1, 1, 1);
+    //col.a = pos.z * 5;
+
     int ps = 2;
     for (int l = -ps; l < ps; l++)
     {
@@ -244,7 +247,8 @@ void putIntoTexture(uint3 id : SV_DispatchThreadID)
                 float hyp = sqrt(l * l + h * h + w * w);
                 if (hyp <= ps)
                 {
-                    liqText[pos + int3(l, h, w)] = float4(1, 1, 1, 1);
+                    liqText[pos + int3(l, h, w)] = col;
+
                 }
             }
         }

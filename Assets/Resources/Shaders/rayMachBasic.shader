@@ -17,9 +17,11 @@ Shader "Unlit/rayMarchBasic"
     }
         SubShader
         {
-            Tags {"Queue" = "Transparent"}
+            Tags {"Queue" = "Transparent" "RenderType" = "Transparent"}
             Blend SrcAlpha OneMinusSrcAlpha
-            Cull Off
+            //Cull Off ZWrite Off ZTest Off
+
+            
             Pass
             {
 
@@ -31,7 +33,8 @@ Shader "Unlit/rayMarchBasic"
                 #include "UnityLightingCommon.cginc" // for _LightColor0
 
                 // Maximum amount of raymarching samples
-                #define MAX_STEP_COUNT 150
+                #define MAX_STEP_COUNT 75
+                #define EPSILON 0.00001f
 
                 struct appdata
                 {
@@ -44,9 +47,11 @@ Shader "Unlit/rayMarchBasic"
                     float4 vertex : SV_POSITION;
                     float3 objectVertex : TEXCOORD1;
                     float3 rayDirection : TEXCOORD2;
+                    float4 screenSpace : TEXCOORD3;
                 };
 
                 sampler3D _MainTex;
+                sampler2D _CameraDepthTexture;
                 float _StepSize;
                 float _TestX;
                 float _TestY;
@@ -67,49 +72,67 @@ Shader "Unlit/rayMarchBasic"
                     //o.objectVertex.y /= 256;
                     //float4 newVert = float4(v.vertex.x, o.objectVertex.y, v.vertex.zw);
                     // Calculate vector from camera to vertex in world space
-                    float3 worldVertex = o.objectVertex * 30 + float3(0,5,0); //*2 will need to be change to whatever object scale is
+                    float3 worldVertex = mul(unity_ObjectToWorld, v.vertex);// * 30 + float3(0,5,0); //*2 will need to be change to whatever object scale is
                     //o.objectVertex = worldVertex;
-                    o.rayDirection = worldVertex - _WorldSpaceCameraPos;;
+                    o.rayDirection = mul(unity_WorldToObject, worldVertex - _WorldSpaceCameraPos);
                     //o.rayDirection.y /= 5;
                     o.vertex = mul(UNITY_MATRIX_VP, float4(worldVertex, 1));
+
+                    o.screenSpace = ComputeScreenPos(o.vertex);
                     return o;
                 }
 
-                float4 blendUnder(float4 color, float4 newColor)
+                float ComputeDepth(float3 objPos) 
                 {
-                    color.rgb += (1.0 - color.a) * newColor.a * newColor.rgb;
-                    color.a += (1.0 - color.a) * newColor.a;
-                    return color;
+                    float4 viewPos = mul(UNITY_MATRIX_MV, float4(objPos,1));
+                    float depth = length(viewPos.xyz);
+                    return depth;
                 }
 
 
 
                 fixed4 frag(v2f i) : SV_Target
                 {
+                    float2 screenSpaceUV = i.screenSpace.xy / i.screenSpace.w;
+                    float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenSpaceUV));
+
                     float4 backCol = float4(0, 0, 0, 0);
-                    //the ray orging is the linearly interpolated vertex position calculated in the vertex shader
-                    float3 rayOrigin = mul(unity_ObjectToWorld, i.objectVertex ) / 30 + 0.5; //  + float3(_TestX, _TestY, _TestZ)+ 0.5;
-                    //rayOrigin += _WorldSpaceCameraPos;
-                    float3 worldRayDirection = normalize(i.rayDirection);// (unity_WorldToObject, float4(normalize(i.rayDirection), 1));
-                     
+                    float3 rayOrigin = i.objectVertex + 0.5;
+
+                    float3 unalteredRay = i.objectVertex;//mul(unity_ObjectToWorld, float4(i.objectVertex,1));
+                    float3 worldRayDirection = normalize(i.rayDirection);
                     for (int x = 0; x < MAX_STEP_COUNT; x++)
                     {
-                        float4 frontCol = tex3D(_MainTex, rayOrigin);// / float4(1, _TestY, _TestZ, _TestW); // + float3(0.25, 0.333f, 0.25));
-                        //frontCol = clamp(frontCol, 0, 1);
-                        //blends the color at each step to porperly lWook through the object as a volume
-                        float val = step(0, rayOrigin.y) * step(rayOrigin.y, 1) * step(0, rayOrigin.z) * step(0, rayOrigin.x) * step(rayOrigin.z, 1) * step(rayOrigin.x, 1);
+                        float4 frontCol = tex3D(_MainTex, rayOrigin);
+                        if(ComputeDepth(unalteredRay) > depth)
+                            frontCol.a = 0;
+
+                        //blends the color at each step to porperly look through the object as a volume
+                        float val = step(0, rayOrigin.y) * step(rayOrigin.y, 1) * step(0, rayOrigin.z) * step(0, rayOrigin.x) * step(rayOrigin.z, 1) * step(rayOrigin.x, 1)/* * smoothstep(0, 1, (1-rayOrigin.z)*5) * smoothstep(0, 1, rayOrigin.z*5) */;
                         
                         backCol.rgb += (1.0 - backCol.a) * frontCol.a * frontCol.rgb * _Alpha * val;
                         backCol.a += (1.0 - backCol.a) * frontCol.a *  _Alpha * val;
-        
+                     
                         rayOrigin += _StepSize * worldRayDirection;
+                        unalteredRay += _StepSize * worldRayDirection;
                     }
                     backCol.rgb *= _Color.rgb;
 
-                    backCol.a = (backCol.a - 0.51) * 2 + 0.25;
-                    backCol.rbg = (backCol.rgb - 0.5) * 1.2 + 0.5;
+                    float4 newCol = backCol;
 
-                    return backCol;
+                    newCol.a = (newCol.a - 0.52) * 10 + 0.2;
+
+                    //newCol.a *= 1 - pow((abs(worldRayDirection.z) * 2),5);
+                    //newCol.a *= i.objectVertex.z;
+  
+                    //newCol.rbg = (newCol.rgb - 0.5) * 2 + 0.5;
+                    //float fog = depth/200;
+                    //newCol = float4(fog, fog, fog,1);
+                    newCol = round(newCol * 30)/30;
+
+
+                    return newCol;
+                    //return float4(depth, 0, 0, 1);
                 }
                 ENDCG
             }
