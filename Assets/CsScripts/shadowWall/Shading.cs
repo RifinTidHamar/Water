@@ -223,8 +223,8 @@ public class Shading : MonoBehaviour
         uint y;
         uint z;
         comp.GetKernelThreadGroupSizes(lightHandel, out x, out y, out z);
-        Debug.Log(x + " " + y + " " + z);
-        Debug.Log(CSlightNum);
+        //Debug.Log(x + " " + y + " " + z);
+        //Debug.Log(CSlightNum);
     }
 
     private void OnApplicationQuit()

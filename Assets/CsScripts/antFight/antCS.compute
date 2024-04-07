@@ -1,0 +1,78 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel antMovement
+#pragma kernel clearTexture
+
+struct ant
+{
+    float3 col;
+    float2 pos;
+    float2 vel;
+    int team; //maybe more than two?
+    int health; //bewteen 0 and 10
+    int size; //0-small; 1-big
+    int alive;
+};
+
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+	//p -= 0.5;
+    return p;
+}
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+RWStructuredBuffer<ant> ants;
+static int2 texRes = int2(285, 135);
+
+#define DT 0.016
+
+void drawBigAnt(int2 pos, float3 col)
+{
+    float4 aCol = float4(col, 1);
+    Result[pos] = aCol;
+    Result[pos + int2(1, 0)] = aCol;
+    Result[pos + int2(1, 1)] = aCol;
+    Result[pos + int2(0, 1)] = aCol;
+}
+
+void drawLittleAnt(int2 pos, float3 col)
+{
+    float4 aCol = float4(col, 1);
+    Result[pos] = aCol;
+    Result[pos + int2(1, 0)] = aCol;
+    Result[pos + int2(1, 1)] = aCol;
+    Result[pos + int2(0, 1)] = aCol;
+    Result[pos + int2(2, 0)] = aCol;
+    Result[pos + int2(2, 1)] = aCol;
+    Result[pos + int2(2, 2)] = aCol;
+    Result[pos + int2(0, 2)] = aCol;
+    Result[pos + int2(1, 2)] = aCol;
+}
+
+[numthreads(10,1,1)]
+void antMovement (uint3 id : SV_DispatchThreadID)
+{
+    ants[id.x].pos += ants[id.x].vel * DT;
+    
+    int2 pos = int2(round(ants[id.x].pos));
+    if(ants[id.x].size == 0)
+    {
+        drawLittleAnt(pos, ants[id.x].col);
+    }
+    else
+    {
+        drawBigAnt(pos, ants[id.x].col);
+    }
+}
+
+[numthreads(15, 15, 1)]
+void clearTexture(uint3 id : SV_DispatchThreadID)
+{
+    Result[id.xy] = 0;
+}

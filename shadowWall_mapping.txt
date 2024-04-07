@@ -1,7 +1,7 @@
 # compiler: R8
 # compiler_version: 3.1.66
 # min_api: 32
-# pg_map_id: 05d1051
+# pg_map_id: d80bfda
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"1.0"}
 bitter.jnibridge.JNIBridge -> bitter.jnibridge.JNIBridge:
@@ -124,7 +124,9 @@ com.unity3d.player.UnityPlayer -> com.unity3d.player.UnityPlayer:
       # {"id":"com.android.tools.r8.synthesized"}
     void -$$Nest$mnativeSoftInputLostFocus(com.unity3d.player.UnityPlayer) -> I
       # {"id":"com.android.tools.r8.synthesized"}
-    void -$$Nest$mshutdown(com.unity3d.player.UnityPlayer) -> J
+    void -$$Nest$mqueueDestroy(com.unity3d.player.UnityPlayer) -> J
+      # {"id":"com.android.tools.r8.synthesized"}
+    void -$$Nest$mshutdown(com.unity3d.player.UnityPlayer) -> K
       # {"id":"com.android.tools.r8.synthesized"}
     android.app.Activity -$$Nest$fgetmActivity(com.unity3d.player.UnityPlayer) -> a
       # {"id":"com.android.tools.r8.synthesized"}
@@ -185,13 +187,13 @@ com.unity3d.player.UnityPlayer -> com.unity3d.player.UnityPlayer:
       # {"id":"com.android.tools.r8.synthesized"}
     void -$$Nest$mnativeResume(com.unity3d.player.UnityPlayer) -> z
       # {"id":"com.android.tools.r8.synthesized"}
-com.unity3d.player.UnityPlayer$B-IA -> com.unity3d.player.a0:
+com.unity3d.player.UnityPlayer$D-IA -> com.unity3d.player.a0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
-com.unity3d.player.UnityPlayer$D-IA -> com.unity3d.player.b0:
+com.unity3d.player.UnityPlayer$F-IA -> com.unity3d.player.b0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
-com.unity3d.player.UnityPlayer$E-IA -> com.unity3d.player.c0:
+com.unity3d.player.UnityPlayer$G-IA -> com.unity3d.player.c0:
 # {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
 # {"id":"com.android.tools.r8.synthesized"}
 com.unity3d.player.UnityPlayer$q -> com.unity3d.player.UnityPlayer$q:
