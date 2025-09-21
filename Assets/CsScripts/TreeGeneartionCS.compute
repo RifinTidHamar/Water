@@ -111,7 +111,7 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     float shad = round(lerp(0, 1, lerpVal) * 5) / 5;
     shad *= 0.5;
     solidInPoly = clamp(solidInPoly, 0, 1);
-    float3 barkColor = (float3(0.1372549, 0.1333333, 0.1294118) + (hash11(treeObj[0].id) * 0.02)) * (inPoly - shad);
+    float3 barkColor = (float3(0.439, 0.345, 0.361) + (hash11(treeObj[0].id) * 0.02)) * (inPoly - shad);
     float4 bark = float4(barkColor, 1) * solidInPoly;
     
     float noise = snoise(pos * float2(10, 10) + noiseOfset) * 0.5 + 0.5;
@@ -129,7 +129,7 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     grassNoise = round(grassNoise);
     grassNoise = clamp(grassNoise, 0, 1);
     float grassColAdd = round(hash11(treeObj[0].id) * 2) / 2 * 0.03 * (1 - grassNoise);// round(snoise(pos * float2(40, 400)) * 2) / 2 * 0.03 * (1 - grassNoise);
-    float4 grassCol = float4(0.082, 0.141, 0.082, 1) * (1-grassNoise) + grassColAdd;
+    float4 grassCol = float4(0.349, 0.569, 0.18, 1) * (1 - grassNoise) + grassColAdd;
     //grassNoise *= 1 - pos.y;
     bark *= grassNoise * round((1 - lowerN));
     bark += grassCol;
@@ -160,7 +160,7 @@ void leafDraw(uint3 id : SV_DispatchThreadID)
         inTri -= inTri * /*(round(snoise(pos * float2(5, 9) + noiseOfset)) * 0.5 + 0.5)*/hash11(i) * 0.2;
 
         //float inTri = inPolygon(pos, leafObjs[id.z].leafy);
-        float3 leafColor = float3(0.1058824, 0.1568628, 0.2117647) * inTri;
+        float3 leafColor = float3(0.302, 0.48, 0.286) * inTri;
         float4 leaves = float4(leafColor, 1) * solidInTri;
 
         leaves.xyz *= 1 - pos.y;

@@ -1,0 +1,126 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MakeCircles
+#pragma kernel PopulateTriIndices
+#pragma kernel CreateWallTexture
+#include "noiseSimplex.cginc"
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+static float pi = 3.14159265359;
+static float radius = 2.5;
+
+struct vertex
+{
+    float3 pos;
+    float3 norm;
+    float2 uv;
+};
+
+struct pathPoint
+{
+    float3 pos;
+    float3 dir;
+    float3 norm;
+    float3 binorm;
+};
+
+StructuredBuffer<pathPoint> path;
+RWStructuredBuffer<vertex> circleVerts;
+RWStructuredBuffer<int> triIndices;
+RWTexture2D<float4> wallTex;
+int texRes;
+
+
+
+float getCaveNoiseX(float x)
+{
+    //return sin(x * 2 * pi) * 0.5 + 0.5;
+    //return (((cos(x * 2 * pi) / 2.0) + 0.5) * (sin(x * 2 * pi) / 2.0) * (sin(x * 7 * pi) + 0.7)) * 0.9 + 0.5;
+    return (abs(1.8 * x - 0.9) + (sin(x * 4 * pi) * 0.1)) + 0.;
+    //return abs(2 * x - 1);
+
+}
+
+[numthreads(8,16,1)]
+void MakeCircles(uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = float2(id.y / 16.0, id.x / 7.0);
+    circleVerts[id.x * 17 + id.y].uv = uv;
+    
+    float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y) * float2(1, 14)) - 0.5) * 0.9;
+    //float caveAdjust = 0;
+    
+    float3 orig = path[id.x].pos;
+    float3 norm = path[id.x].norm;
+    float3 binorm = path[id.x].binorm;
+    int circIndex = id.y + 1;
+    float theta = (pi / 8) * circIndex;
+    circleVerts[id.x * 17 + id.y].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
+    //circleVerts[id.x * 17 + id.y].pos += (snoise(circleVerts[id.x * 17 + id.y].pos) - 0.5) * 0.9;
+    //wrap around case
+    if(id.y == 15)
+    {
+        uv = float2(1, id.x / 7.0);
+        circleVerts[id.x * 17 + id.y + 1].uv = uv;
+        float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y) * float2(1, 14)) - 0.5) * 0.9;
+        //float caveAdjust = 0;
+
+        theta = (pi / 8) * 1; //wrap around to first vertex
+        circleVerts[id.x * 17 + id.y + 1].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
+        //circleVerts[id.x * 17 + id.y + 1].pos += (snoise(circleVerts[id.x * 17 + id.y + 1].pos) - 0.5) * 0.9;
+
+    }
+}
+
+int loopSixteen(int i)
+{
+    if (i % 16 == 0)
+    {
+        i -= 16;
+    }
+    return i;
+}
+
+[numthreads(14,16,1)]
+void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
+{
+    int indI = (id.x * 16 + id.y) * 3;
+    int vertI = ((id.x + 1) / 2) * 17 + id.y;
+    //int vertINext = loopSixteen(vertI + 1);
+    
+    if (id.x % 2 == 0)//strips of triangles going forward
+    {
+        triIndices[indI + 0] = vertI;
+        triIndices[indI + 1] = vertI + 1;
+        triIndices[indI + 2] = (((id.x + 1) / 2) + 1) * 17 + id.y;
+    
+    }
+    else //strips of triangles going backward
+    {
+        triIndices[indI + 0] = vertI + 1;
+        triIndices[indI + 1] = vertI;
+        triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
+    }
+
+}
+
+
+[numthreads(16,16,1)]
+void CreateWallTexture(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = float2((float2) id.xy / (float) texRes.x);
+    float2 circlePoint = float2(cos(pos.x * 2 * pi), sin(pos.x * 2 * pi));
+    int colorAmount = 20;
+    float bigNoise = snoise(float2(getCaveNoiseX(pos.x), pos.y) * float2(4, 4));
+    bigNoise += 1; //between 0 and 2
+    bigNoise *= 0.25; //between 0 and 0.5
+    float bigNoiseMask = clamp(1.2 - abs(snoise(float2(getCaveNoiseX(pos.x), pos.y) * float2(1, 1))),0, 1);
+    bigNoiseMask *= bigNoiseMask * bigNoiseMask;
+    float longSmallNoise = clamp(snoise(float3(circlePoint, pos.y) * float3(1, 1, 70)),0 ,1);
+    float veins = bigNoiseMask * longSmallNoise;
+    veins *= 0.5; //between 0 and 0.5
+    float noise = round(((bigNoise + veins) * 0.4 + 0.6) * colorAmount) / colorAmount;
+
+    wallTex[id.xy] = float4(0.5, 0.25, 0.1, 1) * noise; 
+}

@@ -124,8 +124,10 @@ void DynamicLight(uint3 id : SV_DispatchThreadID)
 	}
 }
 
+
 [numthreads(8,8,1)]
 void rayTracedLight(uint3 id : SV_DispatchThreadID)
 {
+    
 
 }
