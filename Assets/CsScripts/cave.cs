@@ -10,8 +10,6 @@ public class cave : MonoBehaviour
 
     public GameObject circleVertPrefab;
 
-    public Material caveMat;
-
     [SerializeField]
     int texRes = 256;
 
@@ -44,12 +42,6 @@ public class cave : MonoBehaviour
     int pathPointCount = 8;
     int vertexCount = 8 * 17;
     int indiceyCount = 3 * 16 * ((8 * 2) - 2);
-    // Start is called before the first frame update
-    void Start()
-    {
-        makeCircleHandle = caveGenerate.FindKernel("MakeCircles");
-        populateTriIndicesHandle = caveGenerate.FindKernel("PopulateTriIndices");
-    }
 
     void initWallTexture()
     {
@@ -60,7 +52,7 @@ public class cave : MonoBehaviour
         wallTex.Create();
         caveGenerate.SetTexture(createWallTexHandle, "wallTex", wallTex);
         caveGenerate.SetInt("texRes", texRes);
-        caveMat.SetTexture("_MainTex", wallTex);
+        GetComponent<Renderer>().material.SetTexture("_MainTex", wallTex);
     }
 
     void createMesh()
@@ -99,7 +91,7 @@ public class cave : MonoBehaviour
 
     Vector3 getNextRandomPos(Vector3 curVec)
     {
-        return new Vector3(curVec.x + Random.Range(-2f, 2f), curVec.y + Random.Range(-2f, 2f), curVec.z + 5);
+        return new Vector3(curVec.x + Random.Range(-4f, 4f), curVec.y + Random.Range(-7f, 7f), curVec.z + 10);
     }
 
     Vector3 getDir(Vector3 lastPos, Vector3 curPos)
@@ -117,12 +109,20 @@ public class cave : MonoBehaviour
         return Vector3.Cross(dir, norm).normalized;
     }
 
-    public Vector3 getLastPointOnPath()
+    public Vector3[] getLastTwoPointsOnPath()
     {
-        return path[pathPointCount - 1].pos;
+        Vector3[] ret = new Vector3[2];
+        ret[0] = path[pathPointCount - 1].pos;
+        ret[1] = path[pathPointCount - 2].pos;
+        return ret;
     }
 
-    void initPath(Vector3 prevPoint)
+    public PathPoint[] getPath()
+    {
+        return path;
+    }
+
+    void initPath(Vector3[] lastPoints, int pathI)
     {
         path = new PathPoint[pathPointCount];
         //for (int i = 0; i < pathPoints.Length; i++)
@@ -133,8 +133,8 @@ public class cave : MonoBehaviour
         //    path[i].binorm = pathPoints[i].transform.right;
         //}
 
-        path[0].pos = getNextRandomPos(prevPoint);
-        path[0].dir = getDir(prevPoint, path[0].pos);
+        path[0].pos = lastPoints[0];
+        path[0].dir = getDir(lastPoints[1], lastPoints[0]);
         path[0].norm = getNorm(path[0].dir);
         path[0].binorm = getBinorm(path[0].dir, path[0].norm);
 
@@ -150,6 +150,7 @@ public class cave : MonoBehaviour
         pathBuff.SetData(path);
 
         caveGenerate.SetBuffer(makeCircleHandle, "path", pathBuff);
+        caveGenerate.SetInt("pathI", pathI);
     }
 
     void initVertex()
@@ -167,9 +168,13 @@ public class cave : MonoBehaviour
         caveGenerate.SetBuffer(populateTriIndicesHandle, "triIndices", triIndiceBuff);
     }
     // Update is called once per frame
-    public void makeCave(Vector3 prevPoint)
+    public void makeCave(Vector3[] lastPoints, int pathI)
     {
-        initPath(prevPoint);
+
+        makeCircleHandle = caveGenerate.FindKernel("MakeCircles");
+        populateTriIndicesHandle = caveGenerate.FindKernel("PopulateTriIndices");
+
+        initPath(lastPoints, pathI);
         initVertex();
         initIndice();
         initWallTexture();
