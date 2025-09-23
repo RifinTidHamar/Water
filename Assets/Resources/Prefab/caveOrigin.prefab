@@ -48,7 +48,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   caveGenerate: {fileID: 7200000, guid: 247c57846af3edb49ae0076828ed98d9, type: 3}
   circleVertPrefab: {fileID: 5370480190568419193, guid: f6f842a5dbaa7e941bd64952926497df, type: 3}
-  caveMat: {fileID: 2100000, guid: 034d97460ed3f614ca41e25d0c1d2f06, type: 2}
   texRes: 256
 --- !u!33 &936834872015831822
 MeshFilter:

@@ -41,10 +41,10 @@ public class cavePop : MonoBehaviour
         caveArr.Add(curCave);
 
         Renderer rend = curCave.GetComponent<Renderer>();
-        rend.material = new Material(Shader.Find("Unlit/Texture"));
+        new Material(Resources.Load<Shader>("Shaders/Test"));
 
-        lastPoints[0] = new Vector3(20, 0, 0);
-        lastPoints[1] = new Vector3(20, 0, -1);
+        lastPoints[0] = new Vector3(300, 0, 0);
+        lastPoints[1] = new Vector3(300, 0, -1);
 
         curCave.GetComponent<cave>().makeCave(lastPoints, 0);
         lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();

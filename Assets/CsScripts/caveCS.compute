@@ -86,24 +86,26 @@ int loopSixteen(int i)
 [numthreads(14,16,1)]
 void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
 {
-    int indI = (id.x * 16 + id.y) * 3;
-    int vertI = ((id.x + 1) / 2) * 17 + id.y;
-    //int vertINext = loopSixteen(vertI + 1);
-    
-    if (id.x % 2 == 0)//strips of triangles going forward
+    if(id.x < 14)
     {
-        triIndices[indI + 0] = vertI;
-        triIndices[indI + 1] = vertI + 1;
-        triIndices[indI + 2] = (((id.x + 1) / 2) + 1) * 17 + id.y;
+        int indI = (id.x * 16 + id.y) * 3;
+        int vertI = ((id.x + 1) / 2) * 17 + id.y;
+        //int vertINext = loopSixteen(vertI + 1);
     
+        if (id.x % 2 == 0)//strips of triangles going forward
+        {
+            triIndices[indI + 0] = vertI;
+            triIndices[indI + 1] = vertI + 1;
+            triIndices[indI + 2] = (((id.x + 1) / 2) + 1) * 17 + id.y;
+    
+        }
+        else //strips of triangles going backward
+        {
+            triIndices[indI + 0] = vertI + 1;
+            triIndices[indI + 1] = vertI;
+            triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
+        }
     }
-    else //strips of triangles going backward
-    {
-        triIndices[indI + 0] = vertI + 1;
-        triIndices[indI + 1] = vertI;
-        triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
-    }
-
 }
 
 
