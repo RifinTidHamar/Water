@@ -79,7 +79,7 @@ public class Shading : MonoBehaviour
         normMapTex.enableRandomWrite = true;
         normMapTex.filterMode = FilterMode.Point;
         normMapTex.Create();
-        
+
         rend = GetComponent<Renderer>();
         rend.enabled = true;
 
@@ -111,12 +111,12 @@ public class Shading : MonoBehaviour
         }
 
         Vector3[] worldVerts = new Vector3[mesh.vertices.Length];
-        for(int i = 0; i < mesh.vertices.Length; i++)
+        for (int i = 0; i < mesh.vertices.Length; i++)
         {
             //worldVerts[i] = new Vector4(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z, 1);
             worldVerts[i] = meshTransform.localToWorldMatrix.MultiplyVector(mesh.vertices[i]);
         }
-        meshTriangleNum = mesh.triangles.Length/3;
+        meshTriangleNum = mesh.triangles.Length / 3;
         //mesh.triangles[0];
         //Debug.Log(meshTriangleNum);
         triangleArr = new MeshTriangle[meshTriangleNum];
@@ -146,13 +146,13 @@ public class Shading : MonoBehaviour
             triangleArr[i].tangent = mesh.tangents[vertIndices[vCount + 0]];
 
             triangleArr[i].binormal = Vector3.Cross(triangleArr[i].normal, triangleArr[i].tangent);
-            
+
             //Debug.Log(triangleArr[i].p1Uv + " " + triangleArr[i].p2Uv + " " + triangleArr[i].p3Uv);
         }
 
 
         usedUVsArr = new usedUV[usedUVNum];
-        for(int i = 0; i < usedUVNum; i++)
+        for (int i = 0; i < usedUVNum; i++)
         {
             usedUVsArr[i].worldLoc = new Vector3(0, 0, 0);
             usedUVsArr[i].uvPos = new Vector2(0, 0);
@@ -223,8 +223,8 @@ public class Shading : MonoBehaviour
         uint y;
         uint z;
         comp.GetKernelThreadGroupSizes(lightHandel, out x, out y, out z);
-        Debug.Log(x + " " + y + " " + z);
-        Debug.Log(CSlightNum);
+        //Debug.Log(x + " " + y + " " + z);
+        //Debug.Log(CSlightNum);
     }
 
     private void OnApplicationQuit()

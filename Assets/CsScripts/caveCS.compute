@@ -8,7 +8,7 @@
 // with cs.SetTexture
 
 static float pi = 3.14159265359;
-static float radius = 5;
+static float radius = 10;
 
 struct vertex
 {
@@ -41,7 +41,7 @@ float getCaveNoiseX(float x)
 
 }
 
-static float caveAdjustScale = 1.5;
+static float caveAdjustScale = 4;
 
 [numthreads(8,16,1)]
 void MakeCircles(uint3 id : SV_DispatchThreadID)
@@ -86,25 +86,23 @@ int loopSixteen(int i)
 [numthreads(14,16,1)]
 void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
 {
-    if(id.x < 14)
+    
+    int indI = (id.x * 16 + id.y) * 3;
+    int vertI = ((id.x + 1) / 2) * 17 + id.y;
+    //int vertINext = loopSixteen(vertI + 1);
+    
+    if (id.x % 2 == 0)//strips of triangles going forward
     {
-        int indI = (id.x * 16 + id.y) * 3;
-        int vertI = ((id.x + 1) / 2) * 17 + id.y;
-        //int vertINext = loopSixteen(vertI + 1);
+        triIndices[indI + 0] = vertI;
+        triIndices[indI + 1] = vertI + 1;
+        triIndices[indI + 2] = (((id.x + 1) / 2) + 1) * 17 + id.y;
     
-        if (id.x % 2 == 0)//strips of triangles going forward
-        {
-            triIndices[indI + 0] = vertI;
-            triIndices[indI + 1] = vertI + 1;
-            triIndices[indI + 2] = (((id.x + 1) / 2) + 1) * 17 + id.y;
-    
-        }
-        else //strips of triangles going backward
-        {
-            triIndices[indI + 0] = vertI + 1;
-            triIndices[indI + 1] = vertI;
-            triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
-        }
+    }
+    else //strips of triangles going backward
+    {
+        triIndices[indI + 0] = vertI + 1;
+        triIndices[indI + 1] = vertI;
+        triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
     }
 }
 
