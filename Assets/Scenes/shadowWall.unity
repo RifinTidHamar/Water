@@ -157,9 +157,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   comp: {fileID: 7200000, guid: a561560d50c9e444684483fc5bf8f2b9, type: 3}
   texRes: 285
-  shadeMat: {fileID: 2100000, guid: 23a0329bef121cb459e147241cc6ddd5, type: 2}
-  mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-  meshTransform: {fileID: 17095170}
   normalMap: {fileID: 2800000, guid: bfa1adb32254f5645b053f5f2c3be4de, type: 3}
 --- !u!23 &17095168
 MeshRenderer:
@@ -311,6 +308,7 @@ MonoBehaviour:
   color: {r: 1, g: 0.38102233, b: 0, a: 0}
   range: 20
   intensity: 1.3
+  trans: {fileID: 0}
 --- !u!1 &100743083
 GameObject:
   m_ObjectHideFlags: 0
@@ -458,6 +456,7 @@ MonoBehaviour:
   color: {r: 1, g: 0.38039216, b: 0, a: 0}
   range: 20
   intensity: 1.3
+  trans: {fileID: 0}
 --- !u!1 &194552526
 GameObject:
   m_ObjectHideFlags: 0
@@ -895,7 +894,7 @@ Transform:
   m_GameObject: {fileID: 1226306714}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.12405041, y: -0.8180353, z: -2.27}
+  m_LocalPosition: {x: 0.12405041, y: -0.8180353, z: -4.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -980,6 +979,7 @@ MonoBehaviour:
   color: {r: 1, g: 0.38039216, b: 0, a: 0}
   range: 20
   intensity: 1.3
+  trans: {fileID: 0}
 --- !u!1 &1663448752
 GameObject:
   m_ObjectHideFlags: 0

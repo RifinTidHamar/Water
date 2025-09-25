@@ -9,6 +9,7 @@ public class cave : MonoBehaviour
     public ComputeShader caveGenerate;
 
     public GameObject circleVertPrefab;
+    public Shading shadeScript;
 
     [SerializeField]
     int texRes = 256;
@@ -62,6 +63,7 @@ public class cave : MonoBehaviour
 
         Vector3[] vertsForMesh = new Vector3[vertexCount];
         Vector2[] uvForMesh = new Vector2[vertexCount];
+        Vector4[] tanForMesh = new Vector4[vertexCount];
         /*foreach (Vertex i in cirlces)
         {
             Instantiate(circleVertPrefab, i.pos, Quaternion.identity);
@@ -71,6 +73,8 @@ public class cave : MonoBehaviour
         {
             vertsForMesh[i] = cirlces[i].pos;
             uvForMesh[i] = cirlces[i].uv;
+            //Vector3 v3 = Vector3.Cross(cirlces[i].norm, new Vector3(cirlces[i].norm.x, cirlces[i].norm.y, 0)).normalized;
+            //tanForMesh[i] = new Vector4(v3.x, v3.y, v3.z, 1);
         }
         /*int max = 0;
         foreach (int i in triIndices)
@@ -83,9 +87,11 @@ public class cave : MonoBehaviour
         {
             vertices = vertsForMesh,
             uv = uvForMesh,
-            triangles = triIndices
+            triangles = triIndices, 
         };
         mesh.RecalculateNormals();
+        mesh.RecalculateTangents();
+        mesh.Optimize();
         GetComponent<MeshFilter>().mesh = mesh;
     }
 
@@ -167,7 +173,6 @@ public class cave : MonoBehaviour
         triIndiceBuff = new ComputeBuffer(indiceyCount, sizeof(int));
         caveGenerate.SetBuffer(populateTriIndicesHandle, "triIndices", triIndiceBuff);
     }
-    // Update is called once per frame
     public void makeCave(Vector3[] lastPoints, int pathI)
     {
 
@@ -181,14 +186,14 @@ public class cave : MonoBehaviour
 
         caveGenerate.Dispatch(makeCircleHandle, 1, 1, 1);
         caveGenerate.Dispatch(populateTriIndicesHandle, 1, 1, 1);
-        caveGenerate.Dispatch(createWallTexHandle, texRes / 16, texRes / 16, 1);
+        caveGenerate.Dispatch(createWallTexHandle, texRes / 15, texRes / 15, 1);
         createMesh();
+
+        shadeScript.enabled = true;
     }
 
-    private void OnDestroy()
+private void OnDestroy()
     {
-      
-
         pathBuff.Release();
         vertexBuff.Release();
         triIndiceBuff.Release();

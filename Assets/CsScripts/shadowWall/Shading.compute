@@ -108,7 +108,7 @@ void DynamicLight(uint3 id : SV_DispatchThreadID)
 			float dist = length(lightMinusLoc);
 			float maxDist = lights[i].range;
 			float4 col = normalize(lights[i].color) * lights[i].intensity;
-			float3 lightVec = normalize(lightMinusLoc)* (hash11((id.x ) * (id.y)) * 0.2 + 0.9);
+            float3 lightVec = normalize(lightMinusLoc);// * (hash11((id.x) * (id.y)) * 0.2 + 0.9);
 			
 			float angleBetweenLightAndLoc = dot(lightVec, usedUVs[texRes * id.y + id.x].normal) ;
 

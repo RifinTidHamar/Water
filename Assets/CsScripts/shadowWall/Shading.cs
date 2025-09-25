@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class Shading : MonoBehaviour
 {
     public ComputeShader comp;
     public int texRes;
-    public Material shadeMat;
-    public Mesh mesh;
-    public Transform meshTransform;
+    Material shadeMat;
+    Mesh mesh;
+   // public Transform meshTransform;
     public Texture normalMap;
 
     //public Texture2DArray
@@ -69,6 +70,10 @@ public class Shading : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        comp = Instantiate(comp);
+
+        Debug.Log("Im here");
+
         usedUVNum = texRes * texRes;
         outTex = new RenderTexture(texRes, texRes, 4);
         outTex.enableRandomWrite = true;
@@ -79,14 +84,16 @@ public class Shading : MonoBehaviour
         normMapTex.enableRandomWrite = true;
         normMapTex.filterMode = FilterMode.Point;
         normMapTex.Create();
-
-        rend = GetComponent<Renderer>();
-        rend.enabled = true;
+        Debug.Log("Im here1");
 
         rend = GetComponent<Renderer>();
         rend.enabled = true;
         shadingHandel = comp.FindKernel("CSMain");
         lightHandel = comp.FindKernel("DynamicLight");
+
+        mesh = rend.GetComponent<MeshFilter>().mesh;
+        shadeMat = rend.material;
+        Debug.Log("Im here2");
 
         populateArray();
         initShader();
@@ -94,27 +101,24 @@ public class Shading : MonoBehaviour
 
     void populateArray()
     {
-        lightObject = GameObject.FindGameObjectsWithTag("Light");
-        CSlightNum = lightObject.Length;
+        CSlightNum = LightDat.AllLights.Count;
         lightArr = new CSLight[CSlightNum];
         lightData = new LightDat[CSlightNum];
         //TODO: make values changebale in editor
 
         for (int i = 0; i < CSlightNum; i++)
         {
-            lightData[i] = lightObject[i].gameObject.GetComponent<LightDat>();
-
-            lightArr[i].loc = lightObject[i].gameObject.transform.position;
-            lightArr[i].color = lightData[i].color;
-            lightArr[i].range = lightData[i].range;
-            lightArr[i].intensity = lightData[i].intensity;
+            lightArr[i].loc = LightDat.AllLights[i].trans.position;
+            lightArr[i].color = LightDat.AllLights[i].color;
+            lightArr[i].range = LightDat.AllLights[i].range;
+            lightArr[i].intensity = LightDat.AllLights[i].intensity;
         }
 
         Vector3[] worldVerts = new Vector3[mesh.vertices.Length];
         for (int i = 0; i < mesh.vertices.Length; i++)
         {
             //worldVerts[i] = new Vector4(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z, 1);
-            worldVerts[i] = meshTransform.localToWorldMatrix.MultiplyVector(mesh.vertices[i]);
+            worldVerts[i] = this.transform.TransformPoint(mesh.vertices[i]);
         }
         meshTriangleNum = mesh.triangles.Length / 3;
         //mesh.triangles[0];
@@ -127,6 +131,8 @@ public class Shading : MonoBehaviour
         }*/
         //Debug.Log(vertIndices.Length / 3);
         //Debug.Log(mesh.uv.Length);
+
+
         for (int i = 0; i < meshTriangleNum; i++)
         {
             int vCount = i * 3;
@@ -206,13 +212,12 @@ public class Shading : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         for (int i = 0; i < CSlightNum; i++)
         {
-            lightArr[i].loc = lightObject[i].gameObject.transform.position;
-            lightArr[i].color = lightData[i].color;
-            lightArr[i].range = lightData[i].range;
-            lightArr[i].intensity = lightData[i].intensity;
+            lightArr[i].loc = LightDat.AllLights[i].trans.position;
+            lightArr[i].color = LightDat.AllLights[i].color;
+            lightArr[i].range = LightDat.AllLights[i].range;
+            lightArr[i].intensity = LightDat.AllLights[i].intensity;
         }
         lightBuffer.SetData(lightArr);
 
@@ -227,7 +232,7 @@ public class Shading : MonoBehaviour
         //Debug.Log(CSlightNum);
     }
 
-    private void OnApplicationQuit()
+    private void OnDisable()
     {
         triangleBuffer.Release();
         lightBuffer.Release();

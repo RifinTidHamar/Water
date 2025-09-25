@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8517089654825006312}
   - component: {fileID: 936834872015831822}
   - component: {fileID: 6872034007838157170}
+  - component: {fileID: 4378007069615931255}
   m_Layer: 0
   m_Name: caveOrigin
   m_TagString: Untagged
@@ -48,7 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   caveGenerate: {fileID: 7200000, guid: 247c57846af3edb49ae0076828ed98d9, type: 3}
   circleVertPrefab: {fileID: 5370480190568419193, guid: f6f842a5dbaa7e941bd64952926497df, type: 3}
-  texRes: 512
+  shadeScript: {fileID: 4378007069615931255}
+  texRes: 285
 --- !u!33 &936834872015831822
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -99,3 +101,18 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4378007069615931255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5092045136019565921}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0feebae3fbfe52645aa1b27f5e8b5e91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comp: {fileID: 7200000, guid: a561560d50c9e444684483fc5bf8f2b9, type: 3}
+  texRes: 285
+  normalMap: {fileID: 2800000, guid: 7e8c5fd809b89c44d9558df682959a71, type: 3}

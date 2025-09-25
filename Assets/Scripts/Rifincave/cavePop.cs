@@ -41,7 +41,7 @@ public class cavePop : MonoBehaviour
         caveArr.Add(curCave);
 
         Renderer rend = curCave.GetComponent<Renderer>();
-        new Material(Resources.Load<Shader>("Shaders/Test"));
+        rend.material = new Material(Resources.Load<Shader>("Shaders/DoubleTex"));
 
         lastPoints[0] = new Vector3(300, 0, 0);
         lastPoints[1] = new Vector3(300, 0, -1);
@@ -54,8 +54,7 @@ public class cavePop : MonoBehaviour
             caveArr.Add(curCave);
 
             rend = curCave.GetComponent<Renderer>();
-            rend.material = new Material(Shader.Find("Unlit/Texture"));
-
+            rend.material = new Material(Resources.Load<Shader>("Shaders/DoubleTex"));
             curCave.GetComponent<cave>().makeCave(lastPoints, i);
             lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();
         }
@@ -71,9 +70,53 @@ public class cavePop : MonoBehaviour
     {
         sAnim.Play();
         StartCoroutine(splineUpdate());
+        StartCoroutine(caveUpdate());
         totalCavesMade = caveCount;
     }
 
+    void makeNewCave()
+    {
+        GameObject lastCave = (GameObject)caveArr[caveI];
+        GameObject curCave = (GameObject)caveArr[caveI + 1];
+
+        GameObject destroyCave = (GameObject)caveArr[caveI];
+        Destroy(destroyCave);
+        caveArr.RemoveAt(0);
+        curCave = GameObject.Instantiate(Resources.Load<GameObject>("prefab/caveOrigin"), new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+        caveArr.Add(curCave);
+
+        Renderer rend = curCave.GetComponent<Renderer>();
+        rend.material = new Material(Resources.Load<Shader>("Shaders/DoubleTex"));
+
+        curCave.GetComponent<cave>().makeCave(lastPoints, totalCavesMade);
+        totalCavesMade++;
+        //caveI--;
+        lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();
+    }
+
+    private IEnumerator caveUpdate()
+    {
+        float dur = 0;
+        float oldDur = 0;
+
+        sAnim.Update();
+        dur = sAnim.Duration;
+        dur -= oldDur;
+        oldDur += dur;
+        yield return new WaitForSeconds(dur + (dur/2.0f));
+        makeNewCave();
+
+        while (true)
+        {
+            sAnim.Update();
+            dur = sAnim.Duration;
+            dur -= oldDur;
+            oldDur += dur;
+
+            yield return new WaitForSeconds(dur - 0.5f);
+            makeNewCave();
+        }
+    }
     private IEnumerator splineUpdate()
     {
         float dur = 0;
@@ -99,24 +142,8 @@ public class cavePop : MonoBehaviour
                 curPointsPlusOne[i] = curPoints[i];
             }
             makeCaveSpline(curPointsPlusOne);
-            if(caveI > 0)
-            {
-                GameObject destroyCave = (GameObject)caveArr[caveI - 1];
-                Destroy(destroyCave);
-                caveArr.RemoveAt(0);
-                curCave = GameObject.Instantiate(Resources.Load<GameObject>("prefab/caveOrigin"), new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-                caveArr.Add(curCave);
 
-                Renderer rend = curCave.GetComponent<Renderer>();
-                rend.material = new Material(Shader.Find("Unlit/Texture"));
-
-                curCave.GetComponent<cave>().makeCave(lastPoints, totalCavesMade);
-                totalCavesMade++;
-                caveI--;
-                lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();
-            }
             
-            caveI++;
         }
     }
 }

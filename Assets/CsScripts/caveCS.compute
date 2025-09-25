@@ -47,6 +47,7 @@ static float caveAdjustScale = 4;
 void MakeCircles(uint3 id : SV_DispatchThreadID)
 {
     float2 uv = float2(id.y / 16.0, id.x / 7.0);
+    //uv *= 0.95;
     circleVerts[id.x * 17 + id.y].uv = uv;
     
     float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI) * float2(1, 14)) - 0.5) * caveAdjustScale;
@@ -72,6 +73,8 @@ void MakeCircles(uint3 id : SV_DispatchThreadID)
         //circleVerts[id.x * 17 + id.y + 1].pos += (snoise(circleVerts[id.x * 17 + id.y + 1].pos) - 0.5) * 0.9;
 
     }
+    
+    //circleVerts[id.x * 17 + id.y + 1].uv *= 0.98;
 }
 
 int loopSixteen(int i)
@@ -107,10 +110,10 @@ void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
 }
 
 
-[numthreads(16,16,1)]
+[numthreads(15,15,1)]
 void CreateWallTexture(uint3 id : SV_DispatchThreadID)
 {
-    float2 pos = float2((float2) id.xy / (float) texRes.x);
+    float2 pos = float2((float2) id.xy / (float) texRes);
     float2 circlePoint = float2(cos(pos.x * 2 * pi), sin(pos.x * 2 * pi));
     int colorAmount = 20;
     float bigNoise = snoise(float2(getCaveNoiseX(pos.x), pos.y + pathI) * float2(4, 4));
