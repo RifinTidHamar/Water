@@ -43,8 +43,8 @@ public class cavePop : MonoBehaviour
         Renderer rend = curCave.GetComponent<Renderer>();
         rend.material = new Material(Resources.Load<Shader>("Shaders/DoubleTex"));
 
-        lastPoints[0] = new Vector3(300, 0, 0);
-        lastPoints[1] = new Vector3(300, 0, -1);
+        lastPoints[0] = new Vector3(-300, 0, 0);
+        lastPoints[1] = new Vector3(-300, 0, -1);
 
         curCave.GetComponent<cave>().makeCave(lastPoints, 0);
         lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();

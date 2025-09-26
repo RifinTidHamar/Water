@@ -41,14 +41,15 @@ float getCaveNoiseX(float x)
 
 }
 
-static float caveAdjustScale = 4;
+static float caveAdjustScale = 3;
 
 [numthreads(8,16,1)]
 void MakeCircles(uint3 id : SV_DispatchThreadID)
 {
+    int cvI = id.x * 17 + id.y;
     float2 uv = float2(id.y / 16.0, id.x / 7.0);
     //uv *= 0.95;
-    circleVerts[id.x * 17 + id.y].uv = uv;
+    circleVerts[cvI].uv = uv;
     
     float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI) * float2(1, 14)) - 0.5) * caveAdjustScale;
     //float caveAdjust = 0;
@@ -58,22 +59,20 @@ void MakeCircles(uint3 id : SV_DispatchThreadID)
     float3 binorm = path[id.x].binorm;
     int circIndex = id.y + 1;
     float theta = (pi / 8) * circIndex;
-    circleVerts[id.x * 17 + id.y].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
-    //circleVerts[id.x * 17 + id.y].pos += (snoise(circleVerts[id.x * 17 + id.y].pos) - 0.5) * 0.9;
+    circleVerts[cvI].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
+    //circleVerts[cvI].norm = normalize(orig - circleVerts[cvI].pos);
     //wrap around case
     if(id.y == 15)
     {
         uv = float2(1, id.x / 7.0);
-        circleVerts[id.x * 17 + id.y + 1].uv = uv;
+        circleVerts[cvI+1].uv = uv;
         float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI) * float2(1, 14)) - 0.5) * caveAdjustScale;
         //float caveAdjust = 0;
 
         theta = (pi / 8) * 1; //wrap around to first vertex
-        circleVerts[id.x * 17 + id.y + 1].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
-        //circleVerts[id.x * 17 + id.y + 1].pos += (snoise(circleVerts[id.x * 17 + id.y + 1].pos) - 0.5) * 0.9;
-
+        circleVerts[cvI+1].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
+        //circleVerts[cvI + 1].norm = normalize(orig - circleVerts[cvI+1].pos);
     }
-    
     //circleVerts[id.x * 17 + id.y + 1].uv *= 0.98;
 }
 
@@ -89,6 +88,7 @@ int loopSixteen(int i)
 [numthreads(14,16,1)]
 void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
 {
+   
     
     int indI = (id.x * 16 + id.y) * 3;
     int vertI = ((id.x + 1) / 2) * 17 + id.y;
@@ -96,16 +96,16 @@ void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
     
     if (id.x % 2 == 0)//strips of triangles going forward
     {
-        triIndices[indI + 0] = vertI;
-        triIndices[indI + 1] = vertI + 1;
-        triIndices[indI + 2] = (((id.x + 1) / 2) + 1) * 17 + id.y;
-    
+        
+        triIndices[indI + 1] = (((id.x + 1) / 2) + 1) * 17 + id.y;
+        triIndices[indI + 2] = vertI;
+        triIndices[indI + 0] = vertI+1;
     }
     else //strips of triangles going backward
     {
-        triIndices[indI + 0] = vertI + 1;
-        triIndices[indI + 1] = vertI;
-        triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
+        triIndices[indI + 1] = vertI + 1;
+        triIndices[indI + 2] = vertI;
+        triIndices[indI + 0] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
     }
 }
 
@@ -126,5 +126,5 @@ void CreateWallTexture(uint3 id : SV_DispatchThreadID)
     veins *= 0.5; //between 0 and 0.5
     float noise = round(((bigNoise + veins) * 0.4 + 0.6) * colorAmount) / colorAmount;
 
-    wallTex[id.xy] = float4(0.5, 0.25, 0.1, 1) * noise; 
+    wallTex[id.xy] = noise; 
 }

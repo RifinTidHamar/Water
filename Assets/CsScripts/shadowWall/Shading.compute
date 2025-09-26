@@ -116,7 +116,7 @@ void DynamicLight(uint3 id : SV_DispatchThreadID)
 			{
 				//lightCol = col *angleBetweenLightAndLoc;
 				float4 val = (1 - dist / maxDist) * - 1 * angleBetweenLightAndLoc;
-				val = round(val * 7)/7;
+				val = round(val * 12)/12;
 				lightCol = lerp(lightCol, col, val * val * usedUVs[texRes * id.y + id.x].lit);
 			}
 		}

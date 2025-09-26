@@ -7,6 +7,7 @@ public class cave : MonoBehaviour
     //public GameObject[] pathPoints;
 
     public ComputeShader caveGenerate;
+    public ComputeShader normMapGenerate;
 
     public GameObject circleVertPrefab;
     public Shading shadeScript;
@@ -17,6 +18,7 @@ public class cave : MonoBehaviour
     int makeCircleHandle;
     int populateTriIndicesHandle;
     int createWallTexHandle;
+    int createNormMapHandle;
     public struct PathPoint
     {
         public Vector3 pos;
@@ -47,13 +49,25 @@ public class cave : MonoBehaviour
     void initWallTexture()
     {
         createWallTexHandle = caveGenerate.FindKernel("CreateWallTexture");
+        createNormMapHandle = normMapGenerate.FindKernel("genNormMap");
         RenderTexture wallTex = new RenderTexture(texRes, texRes, 4);
         wallTex.enableRandomWrite = true;
         wallTex.filterMode = FilterMode.Point;
         wallTex.Create();
+
         caveGenerate.SetTexture(createWallTexHandle, "wallTex", wallTex);
         caveGenerate.SetInt("texRes", texRes);
         GetComponent<Renderer>().material.SetTexture("_MainTex", wallTex);
+
+        RenderTexture normMap = new RenderTexture(texRes,texRes,4);
+        normMap.enableRandomWrite = true;
+        normMap.filterMode = FilterMode.Point;
+        normMap.Create();
+
+        normMapGenerate.SetTexture(createNormMapHandle, "nMap", normMap);
+        normMapGenerate.SetTexture(createNormMapHandle, "gray", wallTex);
+        normMapGenerate.SetInt("texRes", texRes);
+        GetComponent<Shading>().normalMap = normMap;
     }
 
     void createMesh()
@@ -63,7 +77,7 @@ public class cave : MonoBehaviour
 
         Vector3[] vertsForMesh = new Vector3[vertexCount];
         Vector2[] uvForMesh = new Vector2[vertexCount];
-        Vector4[] tanForMesh = new Vector4[vertexCount];
+        //Vector3[] normForMesh = new Vector3[vertexCount];
         /*foreach (Vertex i in cirlces)
         {
             Instantiate(circleVertPrefab, i.pos, Quaternion.identity);
@@ -73,6 +87,7 @@ public class cave : MonoBehaviour
         {
             vertsForMesh[i] = cirlces[i].pos;
             uvForMesh[i] = cirlces[i].uv;
+            //normForMesh[i] = cirlces[i].norm;
             //Vector3 v3 = Vector3.Cross(cirlces[i].norm, new Vector3(cirlces[i].norm.x, cirlces[i].norm.y, 0)).normalized;
             //tanForMesh[i] = new Vector4(v3.x, v3.y, v3.z, 1);
         }
@@ -87,17 +102,18 @@ public class cave : MonoBehaviour
         {
             vertices = vertsForMesh,
             uv = uvForMesh,
+            //normals = normForMesh,
             triangles = triIndices, 
         };
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
-        mesh.Optimize();
         GetComponent<MeshFilter>().mesh = mesh;
     }
 
     Vector3 getNextRandomPos(Vector3 curVec)
     {
-        return new Vector3(curVec.x + Random.Range(-4f, 4f), curVec.y + Random.Range(-7f, 7f), curVec.z + 10);
+        return new Vector3(curVec.x + Random.Range(-10f, 0f), curVec.y + Random.Range(-5f, 5f), curVec.z + 10);
+        //return new Vector3(curVec.x + Random.Range(0f, 0f), curVec.y + Random.Range(0f, 0f), curVec.z + 10);
     }
 
     Vector3 getDir(Vector3 lastPos, Vector3 curPos)
@@ -187,6 +203,7 @@ public class cave : MonoBehaviour
         caveGenerate.Dispatch(makeCircleHandle, 1, 1, 1);
         caveGenerate.Dispatch(populateTriIndicesHandle, 1, 1, 1);
         caveGenerate.Dispatch(createWallTexHandle, texRes / 15, texRes / 15, 1);
+        normMapGenerate.Dispatch(createNormMapHandle, texRes / 15, texRes / 15, 1);
         createMesh();
 
         shadeScript.enabled = true;

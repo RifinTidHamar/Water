@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   caveGenerate: {fileID: 7200000, guid: 247c57846af3edb49ae0076828ed98d9, type: 3}
+  normMapGenerate: {fileID: 7200000, guid: de0e9da1750fe3a4fb0b1cb4cf48321b, type: 3}
   circleVertPrefab: {fileID: 5370480190568419193, guid: f6f842a5dbaa7e941bd64952926497df, type: 3}
   shadeScript: {fileID: 4378007069615931255}
   texRes: 285
