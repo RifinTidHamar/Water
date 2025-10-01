@@ -11,6 +11,7 @@ TagManager:
   - trailTexts
   - tree
   - Light
+  - Fire
   layers:
   - Default
   - TransparentFX

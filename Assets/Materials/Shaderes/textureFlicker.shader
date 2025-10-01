@@ -1,20 +1,23 @@
-Shader "Unlit/DoubleTex"
+Shader "Unlit/textureFlicker"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _ShadowTex ("Shadow Tex", 2D) = "white"{}
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags {"Queue" = "Transparent" "RenderType" = "Transparent"}
+        Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            // make fog work
+            #pragma multi_compile_fog
 
+            #include "Assets/CsScripts/noiseSimplex.cginc"
             #include "UnityCG.cginc"
 
             struct appdata
@@ -26,22 +29,17 @@ Shader "Unlit/DoubleTex"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float2 shadUV : TEXCOORD1;
                 float4 vertex : SV_POSITION;
             };
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            sampler2D _ShadowTex;
-            float4 _ShadowTex_ST;
-
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.shadUV = TRANSFORM_TEX(v.uv, _ShadowTex);
                 return o;
             }
 
@@ -49,8 +47,7 @@ Shader "Unlit/DoubleTex"
             {
                 // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-                col *= tex2D(_ShadowTex, i.shadUV);// *0.5 + 0.5;
-                col.a = 1;
+                col.rgb *= snoise(float2(_Time.x, _Time.x) * 40) * 0.3 + 0.7;
                 return col;
             }
             ENDCG

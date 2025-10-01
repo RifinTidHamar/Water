@@ -1,11 +1,10 @@
 fileFormatVersion: 2
-guid: 0feebae3fbfe52645aa1b27f5e8b5e91
+guid: 9e26c8b6476398c4692f792447b6faa0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - comp: {fileID: 7200000, guid: a561560d50c9e444684483fc5bf8f2b9, type: 3}
-  - normalMap: {fileID: 2800000, guid: 8db97c154152427418243366ecfe64fb, type: 3}
+  - comp: {fileID: 7200000, guid: 11941997a26590f4db49459e9fca2371, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

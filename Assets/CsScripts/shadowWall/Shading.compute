@@ -91,12 +91,16 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 		}
 	}
 }
-
+int colCount;
+float4 ambient;
+float lightContrast;
+float lightFallOff;
 [numthreads(15,15,1)]
 void DynamicLight(uint3 id : SV_DispatchThreadID)
 {
-	float4 amb = float4(0.3/1.5, 0.15/1.5, 0.15/1.5, 1);
-	Result[id.xy] = amb; //ambient light
+	//float4 amb = float4(0.3/1.5, 0.15/1.5, 0.15/1.5, 1);
+	//float4 amb = 
+    Result[id.xy] = ambient; //ambient light
 	float4 lightCol = 0;
 	usedUVs[texRes * id.y + id.x].lit = 1;
 	if (usedUVs[texRes * id.y + id.x].used == 1)
@@ -108,17 +112,19 @@ void DynamicLight(uint3 id : SV_DispatchThreadID)
 			float dist = length(lightMinusLoc);
 			float maxDist = lights[i].range;
 			float4 col = normalize(lights[i].color) * lights[i].intensity;
-            float3 lightVec = normalize(lightMinusLoc);// * (hash11((id.x) * (id.y)) * 0.2 + 0.9);
+            float3 lightVec = normalize(lightMinusLoc) /** (hash11((id.x) * (id.y)) * 0.2 + 0.9)*/;
 			
 			float angleBetweenLightAndLoc = dot(lightVec, usedUVs[texRes * id.y + id.x].normal) ;
 
 			if (dist < maxDist && angleBetweenLightAndLoc > 0)
 			{
 				//lightCol = col *angleBetweenLightAndLoc;
-				float4 val = (1 - dist / maxDist) * - 1 * angleBetweenLightAndLoc;
-				val = round(val * 12)/12;
-				lightCol = lerp(lightCol, col, val * val * usedUVs[texRes * id.y + id.x].lit);
-			}
+				float4 val = (1 - dist / maxDist) * angleBetweenLightAndLoc;
+                val = round(val * colCount) / colCount;
+                float4 lerpVal = pow(val, lightFallOff);
+                lerpVal = ((lerpVal - 0.5) * lightContrast + 0.5);
+                lightCol = lerp(lightCol, col, lerpVal * usedUVs[texRes * id.y + id.x].lit);
+            }
 		}
 		Result[id.xy] += lightCol;
 	}

@@ -7,6 +7,8 @@ Texture2D<float4> gray;
 RWTexture2D<float4> nMap;
 int texRes;
 
+static float grayScale = 24;
+
 [numthreads(15,15,1)]
 void genNormMap (uint3 id : SV_DispatchThreadID)
 {
@@ -15,46 +17,49 @@ void genNormMap (uint3 id : SV_DispatchThreadID)
     //compare to texel above and below
     float a;
     float b;
-    if (id.y < texRes-1)
+    float curPCol = gray[id.xy].r;
+    if ((int) id.y < texRes - 1)
     {
-        a = gray[id.xy + int2(0, 1)].r;
+        a = curPCol - gray[id.xy + int2(0, 1)].r;
     }
     else
     {
-        a = gray[id.xy + int2(0, -1)].r;
+        a = curPCol - gray[id.xy + int2(0, -1)].r;
     }
-    if(id.y > 0)
+    if ((int) id.y > 0)
     {
-        b = gray[id.xy + int2(0, -1)].r;
+        b = curPCol - gray[id.xy + int2(0, -1)].r;
     }
     else
     {
-        b = gray[id.xy + int2(0, 1)].r;
+        b = curPCol - gray[id.xy + int2(0, 1)].r;
     }
-    float avGrayab = (a + b)/2;
+    float avGrayab = ((a + b) / 2) * grayScale;
     float l;
     float r;
-    if(id.x < texRes-1)
+    if ((int) id.x < texRes - 1)
     {
-        r = gray[id.xy + int2(1, 0)].r;
+        r = curPCol - gray[id.xy + int2(1, 0)].r;
     }
     else
     {
-        r = gray[id.xy + int2(-1, 0)].r;
+        r = curPCol - gray[id.xy + int2(-1, 0)].r;
     }
-    if(id.x > 0)
+    if ((int) id.x > 0)
     {
-        l = gray[id.xy + int2(-1, 0)].r;
+        l = curPCol - gray[id.xy + int2(-1, 0)].r;
     }
     else
     {
-        l = gray[id.xy + int2(1, 0)].r;
+        l = curPCol - gray[id.xy + int2(1, 0)].r;
     }
-    float avGraylr = (l + r) / 2.0;
+    float avGraylr = ((l + r) / 2) * grayScale;
     
-    avGrayab = avGrayab * 2.0 - 1.0;
-    avGraylr = avGraylr * 2.0 - 1.0;
-    normalCol = normalize(float3(avGraylr, avGrayab, 1.0));
+    //avGrayab = avGrayab * 2.0 - 1.0;
+    //avGraylr = avGraylr * 2.0 - 1.0;
+    normalCol = float3(avGraylr, avGrayab, 1);
+    normalCol = normalCol * 0.5 + 0.5;
+    //normalCol *= normalCol;
     nMap[id.xy] = float4(normalCol, 1.0);
     //nMap[id.xy] = gray[id.xy];
 

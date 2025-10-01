@@ -1,0 +1,37 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture3D<float4> Result;
+
+struct fireData
+{
+    float2 stretch;
+};
+
+float dt;
+int texRes;
+float2 stretch;
+StructuredBuffer<fireData> fireStretch;
+int planes;
+#include "noiseSimplex.cginc"
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 pos = float2((((float2) id.xy) / (float)texRes) - 0.5);
+    float zPos = (float)id.z / (float)planes;
+    float noise = snoise(float3(pos * fireStretch[id.z].stretch - float2(0, dt * 6), dt / 4 + id.z * 100));
+    //float noise = snoise(float3(pos.xy * 2.5f, id.z));//snoise(float3(pos * fireStretch[id.z].stretch, id.z));
+    //noise += step(-0.5, pos.y) * step(pos.y, -0.3);
+    noise += 1 - ((float)id.y / (float)texRes - 0.2) * 2;
+    //noise *= smoothstep(-0.5, -0.3, pos.y);
+    //noise *= 1 - smoothstep(0.3, 0.5, pos.y);
+    noise *= smoothstep(-0.2, -0.1, pos.x);
+    noise *= 1 - smoothstep(0.1, 0.2, pos.x);
+    int colCount = 3;
+    noise = round(noise * (float) colCount) / (float) colCount;
+     //noise = clamp(noise, 0.3, 1);
+    //noise -= 0.5;
+    Result[float3(id.xyz)] = noise;
+}

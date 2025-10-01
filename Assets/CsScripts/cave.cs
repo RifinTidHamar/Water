@@ -57,7 +57,7 @@ public class cave : MonoBehaviour
 
         caveGenerate.SetTexture(createWallTexHandle, "wallTex", wallTex);
         caveGenerate.SetInt("texRes", texRes);
-        GetComponent<Renderer>().material.SetTexture("_MainTex", wallTex);
+        //GetComponent<Renderer>().material.SetTexture("_MainTex", wallTex);
 
         RenderTexture normMap = new RenderTexture(texRes,texRes,4);
         normMap.enableRandomWrite = true;
@@ -112,8 +112,16 @@ public class cave : MonoBehaviour
 
     Vector3 getNextRandomPos(Vector3 curVec)
     {
-        return new Vector3(curVec.x + Random.Range(-10f, 0f), curVec.y + Random.Range(-5f, 5f), curVec.z + 10);
+        Vector3 distOfNextPathPoint = new Vector3(curVec.x + Random.Range(-0, 0f), curVec.y + Random.Range(-0f, 0f), curVec.z + 10);
+        return distOfNextPathPoint;
         //return new Vector3(curVec.x + Random.Range(0f, 0f), curVec.y + Random.Range(0f, 0f), curVec.z + 10);
+    }
+
+    Vector3 getNextCirclePos(float i, Vector3 lastPos)
+    {
+        float r = 15;
+        Vector3 posNextPoint = lastPos + new Vector3(Mathf.Sin(-i * 0.07f) * r, 0/*Random.Range(-4f, 4f)*/, Mathf.Cos(i* 0.07f) * r);
+        return posNextPoint;
     }
 
     Vector3 getDir(Vector3 lastPos, Vector3 curPos)
@@ -162,7 +170,7 @@ public class cave : MonoBehaviour
 
         for (int i = 1; i < pathPointCount; i++)
         {
-            path[i].pos = getNextRandomPos(path[i - 1].pos);
+            path[i].pos = getNextCirclePos((float)(i + (pathI * pathPointCount)), path[i - 1].pos);
             path[i].dir = getDir(path[i - 1].pos, path[i].pos);
             path[i].norm = getNorm(path[i].dir);
             path[i].binorm = getBinorm(path[i].dir, path[i].norm);
@@ -189,7 +197,7 @@ public class cave : MonoBehaviour
         triIndiceBuff = new ComputeBuffer(indiceyCount, sizeof(int));
         caveGenerate.SetBuffer(populateTriIndicesHandle, "triIndices", triIndiceBuff);
     }
-    public void makeCave(Vector3[] lastPoints, int pathI)
+    public void makeCave(Vector3[] lastPoints, int pathI, int seed)
     {
 
         makeCircleHandle = caveGenerate.FindKernel("MakeCircles");
@@ -199,7 +207,7 @@ public class cave : MonoBehaviour
         initVertex();
         initIndice();
         initWallTexture();
-
+        caveGenerate.SetInt("seed", seed);
         caveGenerate.Dispatch(makeCircleHandle, 1, 1, 1);
         caveGenerate.Dispatch(populateTriIndicesHandle, 1, 1, 1);
         caveGenerate.Dispatch(createWallTexHandle, texRes / 15, texRes / 15, 1);

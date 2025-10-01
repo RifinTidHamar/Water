@@ -15,7 +15,7 @@ public class pointInTravelDirection : MonoBehaviour
     {
         Vector3 curPosition = transform.position;
         Vector3 travelDirection = (target.position - oldPosition).normalized;
-        target.rotation = Quaternion.Lerp(target.rotation, Quaternion.LookRotation(travelDirection), Time.deltaTime * 5f);
+        target.rotation = Quaternion.Lerp(target.rotation, Quaternion.LookRotation(travelDirection), Time.deltaTime * 1f);
         target.eulerAngles = new Vector3(12.36f, target.eulerAngles.y, 0);
         oldPosition = target.position;
     }

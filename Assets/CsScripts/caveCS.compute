@@ -9,6 +9,7 @@
 
 static float pi = 3.14159265359;
 static float radius = 10;
+int seed;
 
 struct vertex
 {
@@ -38,20 +39,33 @@ float getCaveNoiseX(float x)
     //return (((cos(x * 2 * pi) / 2.0) + 0.5) * (sin(x * 2 * pi) / 2.0) * (sin(x * 7 * pi) + 0.7)) * 0.9 + 0.5;
     return (abs(1.8 * x - 0.9) + (sin(x * 4 * pi) * 0.1)) + 0.5;
     //return abs(2 * x - 1);
-
 }
 
-static float caveAdjustScale = 3;
+static float caveAdjustScale = 4;
+
+float getCaveNoise(float2 coord, float3 stretch)
+{
+    float2 circlePoint = float2(cos(coord.x * 2 * pi), sin(coord.x * 2 * pi));
+    float caveAdjust = snoise(float3(circlePoint, coord.y) * stretch) * caveAdjustScale;
+    return caveAdjust;
+}
 
 [numthreads(8,16,1)]
 void MakeCircles(uint3 id : SV_DispatchThreadID)
 {
     int cvI = id.x * 17 + id.y;
     float2 uv = float2(id.y / 16.0, id.x / 7.0);
-    //uv *= 0.95;
     circleVerts[cvI].uv = uv;
-    
-    float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI) * float2(1, 14)) - 0.5) * caveAdjustScale;
+    float uvShft = 1.0/texRes;
+    int uvShftScale = 2;
+    circleVerts[cvI].uv *= 1 - (uvShft * uvShftScale);
+    circleVerts[cvI].uv += uvShft;
+
+    float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI + seed) * float2(1, 14))) * caveAdjustScale;
+    float mask = smoothstep(-0.15, -0.05, -uv.x) + smoothstep(0.15, 0.25, uv.x);;
+    //caveAdjust *= mask;
+    //float3 stretch = float3(0.4, 0.4, 16);
+    //float caveAdjust = getCaveNoise(float2(uv.x, uv.y + pathI), stretch);
     //float caveAdjust = 0;
     
     float3 orig = path[id.x].pos;
@@ -59,30 +73,28 @@ void MakeCircles(uint3 id : SV_DispatchThreadID)
     float3 binorm = path[id.x].binorm;
     int circIndex = id.y + 1;
     float theta = (pi / 8) * circIndex;
-    circleVerts[cvI].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
+    circleVerts[cvI].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + (float3(1, mask, 1) * float3(caveAdjust, caveAdjust, 0));
+   
     //circleVerts[cvI].norm = normalize(orig - circleVerts[cvI].pos);
     //wrap around case
     if(id.y == 15)
     {
         uv = float2(1, id.x / 7.0);
-        circleVerts[cvI+1].uv = uv;
-        float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI) * float2(1, 14)) - 0.5) * caveAdjustScale;
+        cvI++;
+        circleVerts[cvI].uv = uv;
+        circleVerts[cvI].uv *= 1 - (uvShft * uvShftScale);
+        circleVerts[cvI].uv += uvShft;
+        
+        theta = (pi / 8) * 1; //wrap around to first vertex
+        caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI + seed) * float2(1, 14))) * caveAdjustScale;
+        //caveAdjust = getCaveNoise(float2(uv.x, uv.y + pathI), stretch);
+
         //float caveAdjust = 0;
 
-        theta = (pi / 8) * 1; //wrap around to first vertex
-        circleVerts[cvI+1].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + caveAdjust;
+        circleVerts[cvI].pos = orig + radius * (cos(theta) * norm + sin(theta) * binorm) + (float3(1, mask, 1) * float3(caveAdjust, caveAdjust, 0));
+        
         //circleVerts[cvI + 1].norm = normalize(orig - circleVerts[cvI+1].pos);
     }
-    //circleVerts[id.x * 17 + id.y + 1].uv *= 0.98;
-}
-
-int loopSixteen(int i)
-{
-    if (i % 16 == 0)
-    {
-        i -= 16;
-    }
-    return i;
 }
 
 [numthreads(14,16,1)]
@@ -96,35 +108,59 @@ void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
     
     if (id.x % 2 == 0)//strips of triangles going forward
     {
-        
-        triIndices[indI + 1] = (((id.x + 1) / 2) + 1) * 17 + id.y;
-        triIndices[indI + 2] = vertI;
-        triIndices[indI + 0] = vertI+1;
+        triIndices[indI + 0] = (((id.x + 1) / 2) + 1) * 17 + id.y;
+        triIndices[indI + 1] = vertI;
+        triIndices[indI + 2] = vertI+1;
     }
     else //strips of triangles going backward
     {
-        triIndices[indI + 1] = vertI + 1;
-        triIndices[indI + 2] = vertI;
-        triIndices[indI + 0] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
+        triIndices[indI + 0] = vertI + 1;
+        triIndices[indI + 1] = vertI;
+        triIndices[indI + 2] = (((id.x + 1) / 2) - 1) * 17 + id.y + 1;
     }
 }
 
+float noiseContrast(float n, float contrast)
+{
+    n += 1;
+    n = pow(n, contrast);
+    n -= 1;
+    return n;
+}
 
+static int colorAmount = 1000;
 [numthreads(15,15,1)]
 void CreateWallTexture(uint3 id : SV_DispatchThreadID)
 {
-    float2 pos = float2((float2) id.xy / (float) texRes);
-    float2 circlePoint = float2(cos(pos.x * 2 * pi), sin(pos.x * 2 * pi));
-    int colorAmount = 20;
-    float bigNoise = snoise(float2(getCaveNoiseX(pos.x), pos.y + pathI) * float2(4, 4));
-    bigNoise += 1; //between 0 and 2
-    bigNoise *= 0.25; //between 0 and 0.5
-    float bigNoiseMask = clamp(1.2 - abs(snoise(float2(getCaveNoiseX(pos.x), pos.y + pathI) * float2(1, 1))),0, 1);
-    bigNoiseMask *= bigNoiseMask * bigNoiseMask;
-    float longSmallNoise = clamp(snoise(float3(circlePoint, pos.y + pathI) * float3(1, 1, 70)),0 ,1);
-    float veins = bigNoiseMask * longSmallNoise;
-    veins *= 0.5; //between 0 and 0.5
-    float noise = round(((bigNoise + veins) * 0.4 + 0.6) * colorAmount) / colorAmount;
+    float2 uv = float2((float2) id.xy / (float) texRes);
+    //uv.y *= 1.;
+    float2 circlePoint = float2(cos(uv.x * 2 * pi), sin(uv.x * 2 * pi));
+    
+    float smallNoise = snoise(float3(circlePoint, uv.y + pathI) * float3(6, 6, 40));
+    //smallNoise = noiseContrast(smallNoise, 5);
+    //smallNoise = 1 - abs(-1 * smallNoise);
+    smallNoise = smallNoise * 0.07 + 0.93;
+    float mask = smoothstep(-0.1, -0.05, -uv.x) + smoothstep(0.25, 0.3, uv.x);
+    smallNoise *= 1 - mask;
 
+    float thinNoise = snoise(float3(circlePoint, uv.y + pathI) * float3(0.5, 0.5, 15));
+    thinNoise = noiseContrast(thinNoise, 1.1);
+    //thinNoise = 1;
+    //thinNoise *= 0.25 + 0.75;
+    //thinNoise = 1 - abs(thinNoise);
+    thinNoise *= mask;
+    //thinNoise *= 0.5; //between 0 and 0.5
+    
+    float jNoise = snoise(float3(circlePoint, uv.y + pathI) * float3(0.5, 0.5, 6));
+    jNoise = step(0.6, jNoise);
+    float jewles = snoise(float3(circlePoint, uv.y + pathI) * float3(5, 5, 35)); 
+    jewles = step(0.5, jewles);
+    jewles *= mask;
+    jewles *= jNoise;
+    jewles *= 2;
+    
+    float noise = round(((thinNoise + smallNoise + jewles) * 0.5 + 0.5) * colorAmount) / colorAmount;
+
+    
     wallTex[id.xy] = noise; 
 }

@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 public class Shading : MonoBehaviour
 {
     public ComputeShader comp;
-    public int texRes;
+    public int texRes=128;
     Material shadeMat;
     Mesh mesh;
    // public Transform meshTransform;
@@ -21,7 +21,14 @@ public class Shading : MonoBehaviour
     int shadingHandel;
     int lightHandel;
     int dtID;
-
+    [SerializeField]
+    Color ambient;
+    [SerializeField]
+    int colCount = 9;
+    [SerializeField]
+    float lightContrast = 1;
+    [SerializeField]    
+    float lightFallOff = 1;
     struct MeshTriangle
     {
         public Vector3 p1WPos;
@@ -72,8 +79,6 @@ public class Shading : MonoBehaviour
     {
         comp = Instantiate(comp);
 
-        Debug.Log("Im here");
-
         usedUVNum = texRes * texRes;
         outTex = new RenderTexture(texRes, texRes, 4);
         outTex.enableRandomWrite = true;
@@ -84,7 +89,6 @@ public class Shading : MonoBehaviour
         normMapTex.enableRandomWrite = true;
         normMapTex.filterMode = FilterMode.Point;
         normMapTex.Create();
-        Debug.Log("Im here1");
 
         rend = GetComponent<Renderer>();
         rend.enabled = true;
@@ -93,7 +97,6 @@ public class Shading : MonoBehaviour
 
         mesh = rend.GetComponent<MeshFilter>().mesh;
         shadeMat = rend.material;
-        Debug.Log("Im here2");
 
         populateArray();
         initShader();
@@ -199,6 +202,10 @@ public class Shading : MonoBehaviour
         comp.SetInt("numLights", CSlightNum);
         comp.SetInt("numTriangles", meshTriangleNum);
         comp.SetInt("texRes", texRes);
+        comp.SetInt("colCount", colCount);
+        comp.SetVector("ambient", ambient);
+        comp.SetFloat("lightContrast", lightContrast);
+        comp.SetFloat("lightFallOff", lightFallOff);
 
         comp.Dispatch(shadingHandel, texRes / 15, texRes / 15, 1);
 

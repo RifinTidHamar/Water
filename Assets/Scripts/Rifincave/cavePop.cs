@@ -36,6 +36,8 @@ public class cavePop : MonoBehaviour
 
     void OnEnable()
     {
+        seed = Random.Range(0, 100000);
+
         caveArr = new ArrayList();
         GameObject curCave = GameObject.Instantiate(Resources.Load<GameObject>("prefab/caveOrigin"), new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
         caveArr.Add(curCave);
@@ -46,7 +48,7 @@ public class cavePop : MonoBehaviour
         lastPoints[0] = new Vector3(-300, 0, 0);
         lastPoints[1] = new Vector3(-300, 0, -1);
 
-        curCave.GetComponent<cave>().makeCave(lastPoints, 0);
+        curCave.GetComponent<cave>().makeCave(lastPoints, 0, seed);
         lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();
         for (int i = 1; i < caveCount; i++)
         {
@@ -55,7 +57,7 @@ public class cavePop : MonoBehaviour
 
             rend = curCave.GetComponent<Renderer>();
             rend.material = new Material(Resources.Load<Shader>("Shaders/DoubleTex"));
-            curCave.GetComponent<cave>().makeCave(lastPoints, i);
+            curCave.GetComponent<cave>().makeCave(lastPoints, i, seed);
             lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();
         }
 
@@ -66,6 +68,7 @@ public class cavePop : MonoBehaviour
     }
     int caveI = 0;
     int totalCavesMade = 0;
+    int seed;
     private void Start()
     {
         sAnim.Play();
@@ -88,7 +91,7 @@ public class cavePop : MonoBehaviour
         Renderer rend = curCave.GetComponent<Renderer>();
         rend.material = new Material(Resources.Load<Shader>("Shaders/DoubleTex"));
 
-        curCave.GetComponent<cave>().makeCave(lastPoints, totalCavesMade);
+        curCave.GetComponent<cave>().makeCave(lastPoints, totalCavesMade, seed);
         totalCavesMade++;
         //caveI--;
         lastPoints = curCave.GetComponent<cave>().getLastTwoPointsOnPath();
@@ -103,7 +106,7 @@ public class cavePop : MonoBehaviour
         dur = sAnim.Duration;
         dur -= oldDur;
         oldDur += dur;
-        yield return new WaitForSeconds(dur + (dur/2.0f));
+        yield return new WaitForSeconds(dur + (dur/5f));
         makeNewCave();
 
         while (true)
