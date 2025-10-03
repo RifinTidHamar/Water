@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using Unity.Jobs;
 using UnityEngine;
+using static Embers;
 
 public class cave : MonoBehaviour
 {
@@ -8,6 +11,7 @@ public class cave : MonoBehaviour
 
     public ComputeShader caveGenerate;
     public ComputeShader normMapGenerate;
+    public ComputeShader bugTextureDraw;
 
     public GameObject circleVertPrefab;
     public Shading shadeScript;
@@ -33,6 +37,25 @@ public class cave : MonoBehaviour
         public Vector3 norm;
         public Vector2 uv;
     }
+
+    int bugCount = 5;
+
+    int bugTexHandle;
+    int bugPosHandle;
+    int dtID;
+
+    public struct bugPos
+    {
+        public Vector2Int pos;
+        public Vector2Int vel;
+        public float life;
+        public float lifeSave;
+    }
+
+    bugPos[] bugArr;
+    ComputeBuffer bugBuff;
+    int bugBuffSize = 2 * sizeof(float) + 4 * sizeof(int);
+
     PathPoint[] path;
     ComputeBuffer pathBuff;
     Vertex[] cirlces; //thought of as an 8 by 16 array
@@ -155,13 +178,6 @@ public class cave : MonoBehaviour
     void initPath(Vector3[] lastPoints, int pathI)
     {
         path = new PathPoint[pathPointCount];
-        //for (int i = 0; i < pathPoints.Length; i++)
-        //{
-        //    path[i].pos = pathPoints[i].transform.position;
-        //    path[i].dir = pathPoints[i].transform.forward;
-        //    path[i].norm = pathPoints[i].transform.up;
-        //    path[i].binorm = pathPoints[i].transform.right;
-        //}
 
         path[0].pos = lastPoints[0];
         path[0].dir = getDir(lastPoints[1], lastPoints[0]);
@@ -197,6 +213,52 @@ public class cave : MonoBehaviour
         triIndiceBuff = new ComputeBuffer(indiceyCount, sizeof(int));
         caveGenerate.SetBuffer(populateTriIndicesHandle, "triIndices", triIndiceBuff);
     }
+
+    void initBugs()
+    {
+        bugTextureDraw = Instantiate(bugTextureDraw);
+        bugArr = new bugPos[bugCount];
+        for (int i = 0; i < bugCount; i++)
+        {
+            bugArr[i].pos = new Vector2Int(Random.Range(0, texRes), Random.Range(0, texRes));
+            bugArr[i].vel = new Vector2Int(0, 1);
+
+            bugArr[i].life = Random.Range(1f, 5f);
+            bugArr[i].lifeSave = bugArr[i].life;
+        }
+        bugBuff = new ComputeBuffer(bugCount, bugBuffSize);
+        bugBuff.SetData(bugArr);
+
+        RenderTexture bugTexture = new RenderTexture(texRes, texRes, 0);
+        bugTexture.enableRandomWrite = true;
+        bugTexture.filterMode = FilterMode.Point;
+        bugTexture.Create();
+
+        dtID = Shader.PropertyToID("dtb");
+
+        bugTexHandle = bugTextureDraw.FindKernel("bugTextureDraw");
+        bugPosHandle = bugTextureDraw.FindKernel("bugMov");
+        bugTextureDraw.SetBuffer(bugTexHandle, "bugObj", bugBuff);
+        bugTextureDraw.SetBuffer(bugPosHandle, "bugObj", bugBuff);
+        bugTextureDraw.SetTexture(bugTexHandle, "bugs", bugTexture);
+        bugTextureDraw.SetTexture(bugPosHandle, "bugs", bugTexture);
+        bugTextureDraw.SetInt("bugCount", bugCount);
+        bugTextureDraw.SetInt("texRes", texRes);
+        bugTextureDraw.SetFloat(dtID, 0);
+        GetComponent<Renderer>().material.SetTexture("_MainTex", bugTexture);
+    }
+
+    IEnumerator loop(float waitTime)
+    {
+        while (true)
+        {
+            bugTextureDraw.SetFloat(dtID, Time.time);
+            bugTextureDraw.Dispatch(bugTexHandle, texRes/15, texRes/15, 1);
+            bugTextureDraw.Dispatch(bugPosHandle, bugCount, 1, 1);
+            yield return new WaitForSeconds(waitTime);
+        }
+    }
+
     public void makeCave(Vector3[] lastPoints, int pathI, int seed)
     {
 
@@ -207,13 +269,15 @@ public class cave : MonoBehaviour
         initVertex();
         initIndice();
         initWallTexture();
+        initBugs();
         caveGenerate.SetInt("seed", seed);
         caveGenerate.Dispatch(makeCircleHandle, 1, 1, 1);
         caveGenerate.Dispatch(populateTriIndicesHandle, 1, 1, 1);
         caveGenerate.Dispatch(createWallTexHandle, texRes / 15, texRes / 15, 1);
         normMapGenerate.Dispatch(createNormMapHandle, texRes / 15, texRes / 15, 1);
         createMesh();
-
+        IEnumerator coroutine = loop(0.04f);
+        StartCoroutine(coroutine);
         shadeScript.enabled = true;
     }
 
@@ -222,5 +286,6 @@ private void OnDestroy()
         pathBuff.Release();
         vertexBuff.Release();
         triIndiceBuff.Release();
+        bugBuff.Release();
     }
 }

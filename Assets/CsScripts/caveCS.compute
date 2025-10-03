@@ -41,7 +41,7 @@ float getCaveNoiseX(float x)
     //return abs(2 * x - 1);
 }
 
-static float caveAdjustScale = 4;
+static float caveAdjustScale = 7;
 
 float getCaveNoise(float2 coord, float3 stretch)
 {
@@ -60,9 +60,9 @@ void MakeCircles(uint3 id : SV_DispatchThreadID)
     int uvShftScale = 2;
     circleVerts[cvI].uv *= 1 - (uvShft * uvShftScale);
     circleVerts[cvI].uv += uvShft;
-
-    float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI + seed) * float2(1, 14))) * caveAdjustScale;
-    float mask = smoothstep(-0.15, -0.05, -uv.x) + smoothstep(0.15, 0.25, uv.x);;
+    float2 s = float2(0.5, 1);
+    float caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI + seed) * s)) * caveAdjustScale;
+    float mask = smoothstep(-0.15, -0.1, -uv.x) + smoothstep(0.3, 0.35, uv.x);;
     //caveAdjust *= mask;
     //float3 stretch = float3(0.4, 0.4, 16);
     //float caveAdjust = getCaveNoise(float2(uv.x, uv.y + pathI), stretch);
@@ -86,7 +86,7 @@ void MakeCircles(uint3 id : SV_DispatchThreadID)
         circleVerts[cvI].uv += uvShft;
         
         theta = (pi / 8) * 1; //wrap around to first vertex
-        caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI + seed) * float2(1, 14))) * caveAdjustScale;
+        caveAdjust = (snoise(float2(getCaveNoiseX(uv.x), uv.y + pathI + seed) * s)) * caveAdjustScale;
         //caveAdjust = getCaveNoise(float2(uv.x, uv.y + pathI), stretch);
 
         //float caveAdjust = 0;

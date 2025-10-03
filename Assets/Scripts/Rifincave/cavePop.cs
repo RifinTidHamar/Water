@@ -145,8 +145,6 @@ public class cavePop : MonoBehaviour
                 curPointsPlusOne[i] = curPoints[i];
             }
             makeCaveSpline(curPointsPlusOne);
-
-            
         }
-    }
+    } 
 }
