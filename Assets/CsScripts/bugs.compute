@@ -48,7 +48,6 @@ void bugMov(uint3 id : SV_DispatchThreadID)
         bugs[bugObj[id.x].pos + float2(0, 1)] = col;
         bugs[bugObj[id.x].pos + float2(1, 1)] = col;
 
-        bugs[bugObj[id.x].pos + float2(0, 1)] = col;
         //bugs[bugObj[id.x].pos - float2(1, 1)] = col;
 
         //bugs[bugObj[id.x].pos + float2(1, 0)] = col;

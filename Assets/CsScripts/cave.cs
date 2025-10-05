@@ -1,9 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using Unity.Jobs;
 using UnityEngine;
-using static Embers;
 
 public class cave : MonoBehaviour
 {
@@ -12,6 +8,7 @@ public class cave : MonoBehaviour
     public ComputeShader caveGenerate;
     public ComputeShader normMapGenerate;
     public ComputeShader bugTextureDraw;
+    public ComputeShader dripTextureDraw;
 
     public GameObject circleVertPrefab;
     public Shading shadeScript;
@@ -38,13 +35,7 @@ public class cave : MonoBehaviour
         public Vector2 uv;
     }
 
-    int bugCount = 5;
-
-    int bugTexHandle;
-    int bugPosHandle;
-    int dtID;
-
-    public struct bugPos
+    public struct particle
     {
         public Vector2Int pos;
         public Vector2Int vel;
@@ -52,9 +43,21 @@ public class cave : MonoBehaviour
         public float lifeSave;
     }
 
-    bugPos[] bugArr;
+    int bugCount = 20;
+    int bugTexHandle;
+    int bugPosHandle;
+    int dtbID;
+    particle[] bugArr;
     ComputeBuffer bugBuff;
-    int bugBuffSize = 2 * sizeof(float) + 4 * sizeof(int);
+
+    int dripCount = 1;
+    int dripTexHandle;
+    int dripPosHandle;
+    int dtdID;
+    particle[] dripArr;
+    ComputeBuffer dripBuff;
+
+    int particleBuffSize = 2 * sizeof(float) + 4 * sizeof(int);
 
     PathPoint[] path;
     ComputeBuffer pathBuff;
@@ -69,6 +72,7 @@ public class cave : MonoBehaviour
     int vertexCount = 8 * 17;
     int indiceyCount = 3 * 16 * ((8 * 2) - 2);
 
+    RenderTexture normMap;
     void initWallTexture()
     {
         createWallTexHandle = caveGenerate.FindKernel("CreateWallTexture");
@@ -82,7 +86,7 @@ public class cave : MonoBehaviour
         caveGenerate.SetInt("texRes", texRes);
         //GetComponent<Renderer>().material.SetTexture("_MainTex", wallTex);
 
-        RenderTexture normMap = new RenderTexture(texRes,texRes,4);
+        normMap = new RenderTexture(texRes,texRes,4);
         normMap.enableRandomWrite = true;
         normMap.filterMode = FilterMode.Point;
         normMap.Create();
@@ -143,7 +147,7 @@ public class cave : MonoBehaviour
     Vector3 getNextCirclePos(float i, Vector3 lastPos)
     {
         float r = 15;
-        Vector3 posNextPoint = lastPos + new Vector3(Mathf.Sin(-i * 0.07f) * r, 0/*Random.Range(-4f, 4f)*/, Mathf.Cos(i* 0.07f) * r);
+        Vector3 posNextPoint = lastPos + new Vector3(Mathf.Sin(-i * 0.07f) * r, Random.Range(-4f, 4f), Mathf.Cos(i* 0.07f) * r);
         return posNextPoint;
     }
 
@@ -214,10 +218,13 @@ public class cave : MonoBehaviour
         caveGenerate.SetBuffer(populateTriIndicesHandle, "triIndices", triIndiceBuff);
     }
 
+    RenderTexture bugTexture;
     void initBugs()
     {
+        bugCount = 15;// (int)Random.Range(1, 4);
+
         bugTextureDraw = Instantiate(bugTextureDraw);
-        bugArr = new bugPos[bugCount];
+        bugArr = new particle[bugCount];
         for (int i = 0; i < bugCount; i++)
         {
             bugArr[i].pos = new Vector2Int(Random.Range(0, texRes), Random.Range(0, texRes));
@@ -226,15 +233,15 @@ public class cave : MonoBehaviour
             bugArr[i].life = Random.Range(1f, 5f);
             bugArr[i].lifeSave = bugArr[i].life;
         }
-        bugBuff = new ComputeBuffer(bugCount, bugBuffSize);
+        bugBuff = new ComputeBuffer(bugCount, particleBuffSize);
         bugBuff.SetData(bugArr);
 
-        RenderTexture bugTexture = new RenderTexture(texRes, texRes, 0);
+        bugTexture = new RenderTexture(texRes, texRes, 0);
         bugTexture.enableRandomWrite = true;
         bugTexture.filterMode = FilterMode.Point;
         bugTexture.Create();
 
-        dtID = Shader.PropertyToID("dtb");
+        dtbID = Shader.PropertyToID("dtb");
 
         bugTexHandle = bugTextureDraw.FindKernel("bugTextureDraw");
         bugPosHandle = bugTextureDraw.FindKernel("bugMov");
@@ -244,19 +251,86 @@ public class cave : MonoBehaviour
         bugTextureDraw.SetTexture(bugPosHandle, "bugs", bugTexture);
         bugTextureDraw.SetInt("bugCount", bugCount);
         bugTextureDraw.SetInt("texRes", texRes);
-        bugTextureDraw.SetFloat(dtID, 0);
+        bugTextureDraw.SetFloat(dtbID, 0);
         GetComponent<Renderer>().material.SetTexture("_MainTex", bugTexture);
     }
-
-    IEnumerator loop(float waitTime)
+    IEnumerator loopBugs(float waitTime)
     {
         while (true)
         {
-            bugTextureDraw.SetFloat(dtID, Time.time);
-            bugTextureDraw.Dispatch(bugTexHandle, texRes/15, texRes/15, 1);
+            bugTextureDraw.SetFloat(dtbID, Time.time);
+            bugTextureDraw.Dispatch(bugTexHandle, texRes / 15, texRes / 15, 1);
             bugTextureDraw.Dispatch(bugPosHandle, bugCount, 1, 1);
+
             yield return new WaitForSeconds(waitTime);
         }
+    }
+
+    IEnumerator loopDrips(float waitTime)
+    {
+        while (true)
+        {
+            dripTextureDraw.SetFloat(dtdID, Time.time);
+            dripTextureDraw.Dispatch(dripPosHandle, dripCount, 1, 1);
+            dripTextureDraw.Dispatch(dripTexHandle, texRes / 15, texRes / 15, 1);
+            yield return new WaitForSeconds(waitTime);
+        }
+    }
+
+
+    void initDrips()
+    {
+        dripCount = 2;// (int)Random.Range(1, 4);
+        dripTextureDraw = Instantiate(dripTextureDraw);
+        dripArr = new particle[dripCount];
+        for (int i = 0; i < dripCount; i++)
+        {
+            dripArr[i].pos = new Vector2Int(Random.Range(0, texRes), Random.Range(0, texRes));
+            float xPos = dripArr[i].pos.x;
+            if (xPos < 0.05 * texRes || xPos >= 0.6875 * texRes)
+            {
+                dripArr[i].vel = new Vector2Int(1,0);
+            }
+            else if (xPos > 0.3 * texRes && xPos < 0.6875 * texRes)
+            {
+                dripArr[i].vel = new Vector2Int(-1, 0);
+            }
+            else
+            {
+                dripArr[i].vel = new Vector2Int(0, 0);
+            }
+            //dripArr[i].vel = new Vector2Int(0, 1);
+            dripArr[i].life = Random.Range(0.1f, 3f);
+            dripArr[i].lifeSave = dripArr[i].life;
+        }
+        dripBuff = new ComputeBuffer(dripCount, particleBuffSize);
+        dripBuff.SetData(dripArr);
+
+        RenderTexture dripTexture = new RenderTexture(texRes, texRes, 4);
+        dripTexture.enableRandomWrite = true;
+        dripTexture.filterMode = FilterMode.Point;
+        dripTexture.Create();
+
+        //RenderTexture nMapReset = new RenderTexture(texRes, texRes, 4);
+        //dripTexture.enableRandomWrite = false;
+        //dripTexture.filterMode = FilterMode.Point;
+        //dripTexture.Create();
+        shadeScript.initNormMapTex(texRes);
+        //Graphics.Blit(shadeScript.normMapTex, nMapReset);
+        dtdID = Shader.PropertyToID("dtd");
+
+        dripTexHandle = dripTextureDraw.FindKernel("dripTextureDraw");
+        dripPosHandle = dripTextureDraw.FindKernel("dripMov");
+        dripTextureDraw.SetBuffer(dripTexHandle, "dripObj", dripBuff);
+        dripTextureDraw.SetBuffer(dripPosHandle, "dripObj", dripBuff);
+        dripTextureDraw.SetTexture(dripPosHandle, "drips", dripTexture);
+        dripTextureDraw.SetTexture(dripTexHandle, "drips", dripTexture);
+        dripTextureDraw.SetTexture(dripTexHandle, "nMap", shadeScript.normMapTex);
+        dripTextureDraw.SetTexture(dripTexHandle, "nMapReset", normMap);
+
+        dripTextureDraw.SetInt("dripCount", dripCount);
+        dripTextureDraw.SetInt("texRes", texRes);
+        dripTextureDraw.SetFloat(dtdID, 0);
     }
 
     public void makeCave(Vector3[] lastPoints, int pathI, int seed)
@@ -269,16 +343,19 @@ public class cave : MonoBehaviour
         initVertex();
         initIndice();
         initWallTexture();
-        initBugs();
         caveGenerate.SetInt("seed", seed);
         caveGenerate.Dispatch(makeCircleHandle, 1, 1, 1);
         caveGenerate.Dispatch(populateTriIndicesHandle, 1, 1, 1);
         caveGenerate.Dispatch(createWallTexHandle, texRes / 15, texRes / 15, 1);
         normMapGenerate.Dispatch(createNormMapHandle, texRes / 15, texRes / 15, 1);
         createMesh();
-        IEnumerator coroutine = loop(0.04f);
-        StartCoroutine(coroutine);
         shadeScript.enabled = true;
+        initBugs();
+        initDrips();
+        IEnumerator bugCor = loopBugs(0.04f);
+        StartCoroutine(bugCor);
+        IEnumerator dripCor = loopDrips(0.01f);
+        StartCoroutine(dripCor);
     }
 
 private void OnDestroy()

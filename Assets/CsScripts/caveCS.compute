@@ -41,7 +41,7 @@ float getCaveNoiseX(float x)
     //return abs(2 * x - 1);
 }
 
-static float caveAdjustScale = 7;
+static float caveAdjustScale = 6;
 
 float getCaveNoise(float2 coord, float3 stretch)
 {
@@ -100,8 +100,6 @@ void MakeCircles(uint3 id : SV_DispatchThreadID)
 [numthreads(14,16,1)]
 void PopulateTriIndices(uint3 id : SV_DispatchThreadID)
 {
-   
-    
     int indI = (id.x * 16 + id.y) * 3;
     int vertI = ((id.x + 1) / 2) * 17 + id.y;
     //int vertINext = loopSixteen(vertI + 1);
@@ -143,7 +141,8 @@ void CreateWallTexture(uint3 id : SV_DispatchThreadID)
     float mask = smoothstep(-0.1, -0.05, -uv.x) + smoothstep(0.25, 0.3, uv.x);
     smallNoise *= 1 - mask;
 
-    float thinNoise = snoise(float3(circlePoint, uv.y + pathI) * float3(0.5, 0.5, 15));
+    float yvs = 0;//snoise(float3(circlePoint, uv.y + pathI) * float3(0.3,0.3, 5)) * 0.25 + 0.5;
+    float thinNoise = snoise(yvs + float3(circlePoint, uv.y + pathI) * float3(0.5, 0.5, 15));
     thinNoise = noiseContrast(thinNoise, 1.1);
     //thinNoise = 1;
     //thinNoise *= 0.25 + 0.75;
