@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 935899b62f48ae5498594680ed17d133, type: 3}
-  m_Name: mainConversation
+  m_Name: mainConversation (Auto-Backup)
   m_EditorClassIdentifier: 
   version: 
   author: 
@@ -4999,7 +4999,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: "Load(\"LogCrossingScene\")\r"
+      userScript: "Load(\"TestScene\")\r"
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -8332,8 +8332,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 2079.3533, y: 2671.543}
-    canvasZoom: 0.90999955
+    canvasScrollPosition: {x: 1897.8713, y: 1563.4589}
+    canvasZoom: 0.75999975
   - id: 3
     fields:
     - title: Title
@@ -8872,7 +8872,7 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 0}
+    canvasScrollPosition: {x: 0, y: 7.895767}
     canvasZoom: 0.9400002
   - id: 4
     fields:
@@ -13007,7 +13007,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: "Load(\"TotemMake\")\r"
+      userScript: "Load(\"TestScene\")\r"
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -17845,8 +17845,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 73.68345, y: 2239.5645}
-    canvasZoom: 0.75999975
+    canvasScrollPosition: {x: 6323.7935, y: 613.5907}
+    canvasZoom: 1.1199995
   - id: 6
     fields:
     - title: Title
@@ -24499,7 +24499,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: "Load(\"Smoke\")\r"
+      userScript: "Load(\"TestScene\")\r"
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -24510,8 +24510,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 1995.6538}
-    canvasZoom: 0.72999984
+    canvasScrollPosition: {x: 1847.4093, y: 2.3076923}
+    canvasZoom: 0.52
   - id: 7
     fields:
     - title: Title
@@ -24595,13 +24595,7 @@ MonoBehaviour:
       delaySimStatus: 0
       falseConditionAction: Block
       conditionPriority: 2
-      outgoingLinks:
-      - originConversationID: 7
-        originDialogueID: 0
-        destinationConversationID: 7
-        destinationDialogueID: 1
-        isConnector: 0
-        priority: 2
+      outgoingLinks: []
       conditionsString: 
       userScript: 
       onExecute:
@@ -35935,7 +35929,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: "Load(\"ShadowWall\")\r"
+      userScript: "Load(\"TestScene\")\r"
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -36358,8 +36352,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 290.31046, y: 5603.4995}
-    canvasZoom: 0.72999984
+    canvasScrollPosition: {x: 0, y: 2894.5518}
+    canvasZoom: 0.12999997
   - id: 8
     fields:
     - title: Title
@@ -44958,8 +44952,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 2709.4595
-        y: 3477.159
+        x: 2804.0542
+        y: 3460.9426
         width: 160
         height: 30
     - id: 157
@@ -45324,8 +45318,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 1120.7003, y: 2345.3066}
-    canvasZoom: 0.36999992
+    canvasScrollPosition: {x: 2134.8743, y: 28.716991}
+    canvasZoom: 0.8199997
   syncInfo:
     syncActors: 0
     syncItems: 0
