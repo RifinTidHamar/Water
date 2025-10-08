@@ -221,7 +221,23 @@ public class cave : MonoBehaviour
     RenderTexture bugTexture;
     void initBugs()
     {
-        bugCount = 15;// (int)Random.Range(1, 4);
+        int countChoice = (int)Random.Range(1, 10);
+        if (countChoice < 4)
+        {
+            bugCount = 10;
+        }
+        else if (countChoice < 8)
+        {
+            bugCount = 15;
+        }
+        else if (countChoice < 8)
+        {
+            bugCount = 25;
+        }
+        else
+        {
+            bugCount = 50;
+        }
 
         bugTextureDraw = Instantiate(bugTextureDraw);
         bugArr = new particle[bugCount];
@@ -280,7 +296,19 @@ public class cave : MonoBehaviour
 
     void initDrips()
     {
-        dripCount = 2;// (int)Random.Range(1, 4);
+        int countChoice = (int)Random.Range(1, 11);
+        if (countChoice < 8)
+        {
+            dripCount = 1;
+        }
+        else if(countChoice < 9)
+        {
+            dripCount = 4;
+        }
+        else 
+        {
+            dripCount = 8;
+        }
         dripTextureDraw = Instantiate(dripTextureDraw);
         dripArr = new particle[dripCount];
         for (int i = 0; i < dripCount; i++)

@@ -60,9 +60,9 @@ Shader "Unlit/Fire"
                 float2 uv = v.uv * v.uv;
                 //v.vertex = mul(unity_ObjectToWorld, v.vertex);
                 float time = _Time.y;
-                v.vertex.x += snoise((worldVertex.xy - time) * _Speed) * uv.y * _Strength;
+                v.vertex.x += (snoise(worldVertex.xy * 1.5 - float2(0,(time * _Speed)))/* * 0.5-0.5 */) * (uv.y * 3) * _Strength;
                 //v.vertex.y += snoise((worldVertex.yz - time) * _Speed) * uv.y * _Strength * 2;
-                v.vertex.z += snoise((worldVertex.zx - time) * _Speed) * uv.y * _Strength;
+                //v.vertex.z += (snoise((worldVertex.xz * 1 - time) * _Speed) * 0.5 - 0.5) * (uv.y * 1) * _Strength;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 //o.vertex = mul(UNITY_MATRIX_VP, v.vertex);
                 o.uv = v.uv;

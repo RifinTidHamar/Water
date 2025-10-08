@@ -141,8 +141,11 @@ void CreateWallTexture(uint3 id : SV_DispatchThreadID)
     float mask = smoothstep(-0.1, -0.05, -uv.x) + smoothstep(0.25, 0.3, uv.x);
     smallNoise *= 1 - mask;
 
-    float yvs = 0;//snoise(float3(circlePoint, uv.y + pathI) * float3(0.3,0.3, 5)) * 0.25 + 0.5;
-    float thinNoise = snoise(yvs + float3(circlePoint, uv.y + pathI) * float3(0.5, 0.5, 15));
+    float yvs = 1;//snoise(float3(circlePoint, uv.x + pathI) /** float3(1,1,15)*/) * 0.02;
+    //float yvs = snoise(float3(round(circlePoint * 10) / 10, round(uv.y + pathI * 10)/10) * float3(0.7, 0.7, 2)) * 0.1 + 1;
+    //yvs = sin(yvs) + yvs;
+    float thinNoise = snoise(float3(circlePoint, yvs + uv.y + pathI) * float3(1, 1, 15 + yvs));
+
     thinNoise = noiseContrast(thinNoise, 1.1);
     //thinNoise = 1;
     //thinNoise *= 0.25 + 0.75;
@@ -156,10 +159,10 @@ void CreateWallTexture(uint3 id : SV_DispatchThreadID)
     jewles = step(0.5, jewles);
     jewles *= mask;
     jewles *= jNoise;
-    jewles *= 2;
+    //jewles *= 2;
     
-    float noise = round(((thinNoise + smallNoise + jewles) * 0.5 + 0.5) * colorAmount) / colorAmount;
-
+    float noise = round(((thinNoise + smallNoise ) * 0.5 + 0.5) * colorAmount) / colorAmount;
+    noise += jewles;
     
     wallTex[id.xy] = noise; 
 }
