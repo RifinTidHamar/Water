@@ -77,7 +77,6 @@ bool Intersect(MeshTriangle tri, float3 position)
         {
             inter = true;
         }
-        
     }
     return inter;
 }
@@ -193,7 +192,7 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
     
     if (particles[id.x].position.x > h)
     {
-        particles[id.x].velocity = DampVelocity(u, f, r, particles[id.x].velocity, 1.0 - particleDrag);
+        particles[id.x].velocity = DampVelocity(u, f, -r, particles[id.x].velocity, 1.0 - particleDrag);
         particles[id.x].position.x = h;// - penetrationNormal; // * abs(penetrationLength);
     }
     if (particles[id.x].position.x < l)
@@ -235,10 +234,8 @@ void ComputeColliders(uint3 id : SV_DispatchThreadID)
 void putIntoTexture(uint3 id : SV_DispatchThreadID)
 {
     float3 pos = round(((particles[id.x].position / 25) + 0.5) * texRes);
-    float4 col = float4(1, 1, 1, 1);
-    //col.a = pos.z * 5;
-
-    int ps = 2;
+    int ps = 1;
+    //replace "0" with -ps for full blur
     for (int l = -ps; l < ps; l++)
     {
         for (int h = -ps; h < ps; h++)
@@ -248,15 +245,14 @@ void putIntoTexture(uint3 id : SV_DispatchThreadID)
                 float hyp = sqrt(l * l + h * h + w * w);
                 if (hyp <= ps)
                 {
-                    liqText[pos + int3(l, h, w)] = col;
-
+                    liqText[pos + int3(l, h, w)] = float4(1, 1, 1, 1);
                 }
             }
         }
     }
 }
 
-static int kSize = 0;
+static int kSize = 1;
 
 [numthreads(8, 8, 8)]
 void SmoothPath(uint3 id : SV_DispatchThreadID)
