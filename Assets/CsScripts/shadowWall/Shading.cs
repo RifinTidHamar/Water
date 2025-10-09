@@ -1,26 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class Shading : MonoBehaviour
 {
     public ComputeShader comp;
-    public int texRes;
-    public Material shadeMat;
-    public Mesh mesh;
-    public Transform meshTransform;
+    public int texRes=128;
+    Material shadeMat;
+    Mesh mesh;
+   // public Transform meshTransform;
     public Texture normalMap;
 
     //public Texture2DArray
-    RenderTexture normMapTex;
+    [HideInInspector]
+    public RenderTexture normMapTex;
 
     Renderer rend;
+
     RenderTexture outTex;
 
     int shadingHandel;
     int lightHandel;
     int dtID;
-
+    [SerializeField]
+    Color ambient;
+    [SerializeField]
+    int colCount = 9;
+    [SerializeField]
+    float lightContrast = 1;
+    [SerializeField]    
+    float lightFallOff = 1;
     struct MeshTriangle
     {
         public Vector3 p1WPos;
@@ -47,46 +57,59 @@ public class Shading : MonoBehaviour
         public Vector2 uvPos;
         public Vector3 worldLoc;
         public Vector3 normal;
+        public Vector3 binormal;
+        public Vector3 tangent;
         public int used;
         public float lit;
     };
 
     ComputeBuffer triangleBuffer;
     ComputeBuffer lightBuffer;
-    ComputeBuffer usedUVBuffer;
+    [HideInInspector]
+    public ComputeBuffer usedUVBuffer;
     MeshTriangle[] triangleArr;
     CSLight[] lightArr;
+    [HideInInspector]
     usedUV[] usedUVsArr;
     int meshTriangleNum;
     int CSlightNum;
     int usedUVNum;// = texRes * texRes;
     int meshTriangleSize = sizeof(float) * 18 + sizeof(float) * 6;
     int CSLightSize = sizeof(float) * 9;
-    int usedUVSize = sizeof(float) * 9 + sizeof(int) * 1;
+    int usedUVSize = ((sizeof(float) * 3) * 4) + ((sizeof(float)*2) * 1) + (sizeof(float) * 1) + (sizeof(int) * 1);
     GameObject[] lightObject;
     LightDat[] lightData;
+
+    public void initNormMapTex(int tr)
+    {
+        normMapTex = new RenderTexture(tr, tr, 4);
+        normMapTex.enableRandomWrite = true;
+        normMapTex.filterMode = FilterMode.Point;
+        normMapTex.Create();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        comp = Instantiate(comp);
+
         usedUVNum = texRes * texRes;
+
         outTex = new RenderTexture(texRes, texRes, 4);
         outTex.enableRandomWrite = true;
         outTex.filterMode = FilterMode.Point;
         outTex.Create();
 
-        normMapTex = new RenderTexture(texRes, texRes, 4);
-        normMapTex.enableRandomWrite = true;
-        normMapTex.filterMode = FilterMode.Point;
-        normMapTex.Create();
-        
-        rend = GetComponent<Renderer>();
-        rend.enabled = true;
+        if(normMapTex == null)
+            initNormMapTex(texRes);
 
         rend = GetComponent<Renderer>();
         rend.enabled = true;
         shadingHandel = comp.FindKernel("CSMain");
         lightHandel = comp.FindKernel("DynamicLight");
+
+        mesh = rend.GetComponent<MeshFilter>().mesh;
+        shadeMat = rend.material;
 
         populateArray();
         initShader();
@@ -94,29 +117,26 @@ public class Shading : MonoBehaviour
 
     void populateArray()
     {
-        lightObject = GameObject.FindGameObjectsWithTag("Light");
-        CSlightNum = lightObject.Length;
+        CSlightNum = LightDat.AllLights.Count;
         lightArr = new CSLight[CSlightNum];
         lightData = new LightDat[CSlightNum];
         //TODO: make values changebale in editor
 
         for (int i = 0; i < CSlightNum; i++)
         {
-            lightData[i] = lightObject[i].gameObject.GetComponent<LightDat>();
-
-            lightArr[i].loc = lightObject[i].gameObject.transform.position;
-            lightArr[i].color = lightData[i].color;
-            lightArr[i].range = lightData[i].range;
-            lightArr[i].intensity = lightData[i].intensity;
+            lightArr[i].loc = LightDat.AllLights[i].trans.position;
+            lightArr[i].color = LightDat.AllLights[i].color;
+            lightArr[i].range = LightDat.AllLights[i].range;
+            lightArr[i].intensity = LightDat.AllLights[i].intensity;
         }
 
         Vector3[] worldVerts = new Vector3[mesh.vertices.Length];
-        for(int i = 0; i < mesh.vertices.Length; i++)
+        for (int i = 0; i < mesh.vertices.Length; i++)
         {
             //worldVerts[i] = new Vector4(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z, 1);
-            worldVerts[i] = meshTransform.localToWorldMatrix.MultiplyVector(mesh.vertices[i]);
+            worldVerts[i] = this.transform.TransformPoint(mesh.vertices[i]);
         }
-        meshTriangleNum = mesh.triangles.Length/3;
+        meshTriangleNum = mesh.triangles.Length / 3;
         //mesh.triangles[0];
         //Debug.Log(meshTriangleNum);
         triangleArr = new MeshTriangle[meshTriangleNum];
@@ -127,6 +147,8 @@ public class Shading : MonoBehaviour
         }*/
         //Debug.Log(vertIndices.Length / 3);
         //Debug.Log(mesh.uv.Length);
+
+
         for (int i = 0; i < meshTriangleNum; i++)
         {
             int vCount = i * 3;
@@ -146,17 +168,17 @@ public class Shading : MonoBehaviour
             triangleArr[i].tangent = mesh.tangents[vertIndices[vCount + 0]];
 
             triangleArr[i].binormal = Vector3.Cross(triangleArr[i].normal, triangleArr[i].tangent);
-            
+
             //Debug.Log(triangleArr[i].p1Uv + " " + triangleArr[i].p2Uv + " " + triangleArr[i].p3Uv);
         }
-
-
         usedUVsArr = new usedUV[usedUVNum];
-        for(int i = 0; i < usedUVNum; i++)
+        for (int i = 0; i < usedUVNum; i++)
         {
             usedUVsArr[i].worldLoc = new Vector3(0, 0, 0);
             usedUVsArr[i].uvPos = new Vector2(0, 0);
             usedUVsArr[i].normal = new Vector3(0, 0, 0);
+            usedUVsArr[i].binormal = new Vector3(0, 0, 0);
+            usedUVsArr[i].tangent = new Vector3(0, 0, 0);
             usedUVsArr[i].used = 0;
             usedUVsArr[i].lit = 1;
         }
@@ -170,29 +192,36 @@ public class Shading : MonoBehaviour
 
     void initShader()
     {
+        usedUVBuffer = new ComputeBuffer(usedUVNum, usedUVSize);
         //comp.SetFloat(dtID, 0);
         triangleBuffer = new ComputeBuffer(meshTriangleNum, meshTriangleSize);
         lightBuffer = new ComputeBuffer(CSlightNum, CSLightSize);
-        usedUVBuffer = new ComputeBuffer(usedUVNum, usedUVSize);
         triangleBuffer.SetData(triangleArr);
         lightBuffer.SetData(lightArr);
         usedUVBuffer.SetData(usedUVsArr);
 
         Graphics.Blit(normalMap, normMapTex);
 
-        comp.SetTexture(shadingHandel, "Result", outTex);
-        comp.SetTexture(shadingHandel, "nm", normMapTex);
+        //comp.SetTexture(shadingHandel, "Result", outTex);
+        //comp.SetTexture(shadingHandel, "nm", normMapTex);
 
         comp.SetBuffer(shadingHandel, "triangles", triangleBuffer);
         comp.SetBuffer(shadingHandel, "lights", lightBuffer);
         comp.SetBuffer(shadingHandel, "usedUVs", usedUVBuffer);
+        usedUVBuffer.SetData(usedUVsArr);
 
         comp.SetBuffer(lightHandel, "usedUVs", usedUVBuffer);
-
+        comp.SetTexture(lightHandel, "Result", outTex);
+        comp.SetTexture(lightHandel, "nm", normMapTex);
+        comp.SetBuffer(lightHandel, "lights", lightBuffer);
 
         comp.SetInt("numLights", CSlightNum);
         comp.SetInt("numTriangles", meshTriangleNum);
         comp.SetInt("texRes", texRes);
+        comp.SetInt("colCount", colCount);
+        comp.SetVector("ambient", ambient);
+        comp.SetFloat("lightContrast", lightContrast);
+        comp.SetFloat("lightFallOff", lightFallOff);
 
         comp.Dispatch(shadingHandel, texRes / 15, texRes / 15, 1);
 
@@ -206,28 +235,25 @@ public class Shading : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         for (int i = 0; i < CSlightNum; i++)
         {
-            lightArr[i].loc = lightObject[i].gameObject.transform.position;
-            lightArr[i].color = lightData[i].color;
-            lightArr[i].range = lightData[i].range;
-            lightArr[i].intensity = lightData[i].intensity;
+            lightArr[i].loc = LightDat.AllLights[i].trans.position;
+            lightArr[i].color = LightDat.AllLights[i].color;
+            lightArr[i].range = LightDat.AllLights[i].range;
+            lightArr[i].intensity = LightDat.AllLights[i].intensity;
         }
         lightBuffer.SetData(lightArr);
 
-        comp.SetTexture(lightHandel, "Result", outTex);
-        comp.SetBuffer(lightHandel, "lights", lightBuffer);
         comp.Dispatch(lightHandel, texRes / 15, texRes / 15, 1);
-        uint x;
-        uint y;
-        uint z;
-        comp.GetKernelThreadGroupSizes(lightHandel, out x, out y, out z);
+        //uint x;
+        //uint y;
+        //uint z;
+        //comp.GetKernelThreadGroupSizes(lightHandel, out x, out y, out z);
         //Debug.Log(x + " " + y + " " + z);
         //Debug.Log(CSlightNum);
     }
 
-    private void OnApplicationQuit()
+    private void OnDisable()
     {
         triangleBuffer.Release();
         lightBuffer.Release();
