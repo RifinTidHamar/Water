@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311918, g: 0.3807398, b: 0.35872716, a: 1}
+  m_IndirectSpecularColor: {r: 0.3708985, g: 0.3783704, b: 0.35722548, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -157,12 +157,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   comp: {fileID: 7200000, guid: a561560d50c9e444684483fc5bf8f2b9, type: 3}
   texRes: 285
+  shadeMat: {fileID: 2100000, guid: 23a0329bef121cb459e147241cc6ddd5, type: 2}
+  mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  meshTransform: {fileID: 17095170}
   normalMap: {fileID: 2800000, guid: bfa1adb32254f5645b053f5f2c3be4de, type: 3}
-  normMapTex: {fileID: 0}
-  ambient: {r: 0, g: 0, b: 0, a: 0}
-  colCount: 9
-  lightContrast: 1
-  lightFallOff: 1
 --- !u!23 &17095168
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -313,7 +311,6 @@ MonoBehaviour:
   color: {r: 1, g: 0.38102233, b: 0, a: 0}
   range: 20
   intensity: 1.3
-  trans: {fileID: 0}
 --- !u!1 &100743083
 GameObject:
   m_ObjectHideFlags: 0
@@ -461,7 +458,6 @@ MonoBehaviour:
   color: {r: 1, g: 0.38039216, b: 0, a: 0}
   range: 20
   intensity: 1.3
-  trans: {fileID: 0}
 --- !u!1 &194552526
 GameObject:
   m_ObjectHideFlags: 0
@@ -984,7 +980,6 @@ MonoBehaviour:
   color: {r: 1, g: 0.38039216, b: 0, a: 0}
   range: 20
   intensity: 1.3
-  trans: {fileID: 0}
 --- !u!1 &1396971541
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,7 +992,7 @@ GameObject:
   - component: {fileID: 1396971544}
   - component: {fileID: 1396971543}
   - component: {fileID: 1396971542}
-  - component: {fileID: 1396971546}
+  - component: {fileID: 1396971547}
   m_Layer: 0
   m_Name: leftSpot
   m_TagString: Untagged
@@ -1092,7 +1087,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1396971546
+--- !u!114 &1396971547
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1101,7 +1096,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1396971541}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98af6bf6096f271469b120fb82019bc1, type: 3}
+  m_Script: {fileID: 11500000, guid: eebf403b7e0c11c479a617538c4312d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   side: 0
@@ -1433,7 +1428,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1969374074}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98af6bf6096f271469b120fb82019bc1, type: 3}
+  m_Script: {fileID: 11500000, guid: eebf403b7e0c11c479a617538c4312d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   side: 1

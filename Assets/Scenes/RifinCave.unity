@@ -2601,7 +2601,7 @@ MonoBehaviour:
   color: {r: 0, g: 0.8246536, b: 1, a: 0}
   range: 150
   intensity: 1.2
-  trans: {fileID: 1174335105}
+  trans: {fileID: 0}
 --- !u!114 &1174335107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4114,7 +4114,7 @@ MonoBehaviour:
   color: {r: 0.21173565, g: 0, b: 0.9607843, a: 0}
   range: 400
   intensity: 1.5
-  trans: {fileID: 2113279022}
+  trans: {fileID: 0}
 --- !u!114 &2113279024
 MonoBehaviour:
   m_ObjectHideFlags: 0
