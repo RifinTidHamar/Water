@@ -1,0 +1,21 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct Vertex
+{
+    float3 position;
+    float2 uv;
+    float3 normal;
+    float3 tangent;
+    float3 binormal;
+};
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+[numthreads(8,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+   //have vertices arrange into a circle using the angle stuff. Every loop should reset the angle at 0 (so once you go down the number of edges, I think
+}

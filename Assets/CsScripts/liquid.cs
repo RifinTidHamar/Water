@@ -60,8 +60,8 @@ public class liquid : MonoBehaviour
     public Material material;
 
     // Consts
-    private Vector4 GRAVITY = new Vector4(0, 9.81f, 0.0f, 2000.0f);
-    private const float DT = 0.00016f; //the lower the slower
+    private Vector4 GRAVITY = new Vector4(0, -9.81f, 0.0f, 2000.0f);
+    private const float DT = 0.0005f;
     private const float BOUND_DAMPING = -0.5f;
     const float GAS = 2000.0f;
 
@@ -87,7 +87,7 @@ public class liquid : MonoBehaviour
     int texGSize;
 
     int gravityID;
-   
+
     private void Start()
     {
         initTriArr();
@@ -105,9 +105,8 @@ public class liquid : MonoBehaviour
         shader.Dispatch(kernelBlur, texGSize, texGSize, texGSize);
         shader.Dispatch(kernelSmoothPath, texGSize, texGSize, texGSize);
         Vector3 g = Input.gyro.gravity;
-        float gMul = -9.81f;
-        GRAVITY = new Vector4(g.z * gMul*3, gMul, g.x * gMul, 2000);
-        //GRAVITY = new Vector4( 0, gMul, 0, 2000);
+        float gMul = 9.81f;
+        GRAVITY = new Vector4(g.z * -gMul, g.y * gMul, g.x * -gMul/2, 2000);
         shader.SetVector(gravityID, GRAVITY);
     }
 
@@ -120,7 +119,7 @@ public class liquid : MonoBehaviour
         outTex = new RenderTexture((int)texRes, (int)texRes, 0, GraphicsFormat.R8G8B8A8_UNorm);
         outTex.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
         outTex.volumeDepth = (int)texRes;
-        //outTex.wrapMode = 
+        //outTex.wrapMode = TextureWrapMode.Mir;
         outTex.enableRandomWrite = true;
         outTex.filterMode = FilterMode.Point;
         outTex.Create();
