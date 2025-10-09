@@ -6,10 +6,7 @@ using UnityEngine.EventSystems;
 public class IntroSequence : MonoBehaviour
 {
     [SerializeField]
-    Color plCol;
-
-    [SerializeField]
-    bool doCrack = true;
+    Color plCol;    
     float timeSinceStart;
     float timeUntilCrack = 3;
     public GameObject bluePlane;
@@ -23,11 +20,11 @@ public class IntroSequence : MonoBehaviour
     public Material bPlaneMat;
     float bPlTrans = 1;
     // Start is called before the first frame update
-    private void OnEnable()
+    void Awake()
     {
-        if(Time.time > 5)//to make sure that the blue plane only plays at the start of the game; might need to be changed if we put in a main menu
+        if(Time.time > 5)//to make sure that the blue plane only plays at the start of the game
         {
-            bluePlane.SetActive(false);
+            Destroy(bluePlane);
         }
     }
     void Start()
@@ -40,8 +37,7 @@ public class IntroSequence : MonoBehaviour
     {
         if (Time.time - timeSinceStart >= timeUntilCrack && !crackIsVisiable)
         {
-            if(doCrack)
-                crackPicture.SetActive(true);
+            crackPicture.SetActive(true);
             timeSinceCrack = Time.time;
             crackIsVisiable = true;
         }
@@ -55,7 +51,7 @@ public class IntroSequence : MonoBehaviour
                 plCol = new Color(plCol.r, plCol.g, plCol.b, 1);
                 bPlaneMat.SetColor("_Color", plCol);
                 UIText.enabled = true;
-                bluePlane.SetActive(false);
+                Destroy(bluePlane);
             }
         }
     }

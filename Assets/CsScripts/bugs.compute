@@ -1,0 +1,73 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel bugTextureDraw
+#pragma kernel bugMov
+#include "noiseSimplex.cginc"
+
+struct bugPos
+{
+    int2 pos;
+    int2 vel;
+    float life;
+    float lifeSave;
+};
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+        //p -= 0.5;
+    return p;
+}
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> bugs;
+RWTexture2D<float4> bugsDoub;
+RWStructuredBuffer<bugPos> bugObj;
+
+float dtb;
+
+int bugCount;
+int texRes;
+
+[numthreads(1, 1, 1)]
+void bugMov(uint3 id : SV_DispatchThreadID)
+{
+    float2 startNoise = float2(id.x, dtb * 2);
+    float noise = snoise(startNoise);
+    float noiseRound = round(noise * 2);
+    bugObj[id.x].pos += int2(noiseRound, 1);
+    bugObj[id.x].pos %= texRes;
+    bugObj[id.x].life -= 0.01;
+    float4 col = float4(0, 0, 0, 1);
+    if (bugObj[id.x].life >= 0)
+    {
+        bugs[bugObj[id.x].pos] = col;
+
+        bugs[bugObj[id.x].pos + float2(0, 1)] = col;
+        bugs[bugObj[id.x].pos + float2(1, 1)] = col;
+
+        //bugs[bugObj[id.x].pos - float2(1, 1)] = col;
+
+        //bugs[bugObj[id.x].pos + float2(1, 0)] = col;
+        //bugs[bugObj[id.x].pos + float2(-1, 1)] = col;
+        //bugs[bugObj[id.x].pos + float2(1, -1)] = col;
+
+        //bugs[bugObj[id.x].pos - float2(1, 0)] = col;
+
+    }
+    else
+    {
+        bugObj[id.x].pos.x = (int) (hash11(bugObj[id.x].pos.x) * texRes);
+        bugObj[id.x].pos.y = (int) (hash11(bugObj[id.x].pos.y) * texRes);
+        bugObj[id.x].life = bugObj[id.x].lifeSave;
+    }
+}
+
+[numthreads(15, 15, 1)]
+void bugTextureDraw(uint3 id : SV_DispatchThreadID)
+{
+    bugs[uint2(id.x, id.y)] = 1;
+}
+

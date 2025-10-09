@@ -108,11 +108,11 @@ Shader "Unlit/rayMarchBasic"
                             frontCol.a = 0;
 
                         //blends the color at each step to porperly look through the object as a volume
-                        float val = step(0, rayOrigin.y) * step(rayOrigin.y, 1) * step(0, rayOrigin.z) * step(0, rayOrigin.x) * step(rayOrigin.z, 1) * step(rayOrigin.x, 1)/* * smoothstep(0, 1, (1-rayOrigin.z)*5) * smoothstep(0, 1, rayOrigin.z*5) */;
+                        float val = step(0, rayOrigin.y) * step(rayOrigin.y, 1) * step(0, rayOrigin.z) * step(0, rayOrigin.x) * step(rayOrigin.z, 1) * step(rayOrigin.x, 1);
                         
                         backCol.rgb += (1.0 - backCol.a) * frontCol.a * frontCol.rgb * _Alpha * val;
                         backCol.a += (1.0 - backCol.a) * frontCol.a *  _Alpha * val;
-                     
+        
                         rayOrigin += _StepSize * worldRayDirection;
                         unalteredRay += _StepSize * worldRayDirection;
                     }
@@ -121,15 +121,10 @@ Shader "Unlit/rayMarchBasic"
                     float4 newCol = backCol;
 
                     newCol.a = (newCol.a - 0.52) * 10 + 0.2;
-
-                    //newCol.a *= 1 - pow((abs(worldRayDirection.z) * 2),5);
-                    //newCol.a *= i.objectVertex.z;
   
                     //newCol.rbg = (newCol.rgb - 0.5) * 2 + 0.5;
-                    //float fog = depth/200;
-                    //newCol = float4(fog, fog, fog,1);
-                    newCol = round(newCol * 30)/30;
 
+                    //backCol = float4(depth, 0, 0,1);
 
                     return newCol;
                     //return float4(depth, 0, 0, 1);

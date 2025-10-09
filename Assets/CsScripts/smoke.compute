@@ -118,6 +118,9 @@ void Smoke(uint3 id : SV_DispatchThreadID)
         smp[id.x].vel += direction * attrXYZ;
     }
     
+
+    
+    
     smp[id.x].vel = clamp(smp[id.x].vel, -50, 50);
     
      //for mouse
@@ -130,7 +133,7 @@ void Smoke(uint3 id : SV_DispatchThreadID)
     //rDir = float4(0,0,0,0) - rDir;
     float projection = dot(lineToPoint, rDir.xyz);
 
-    // Calculate the closest point on the line.
+        // Calculate the closest point on the line.
     float3 closestPos = mPos.xyz + (rDir.xyz * projection);
     float dst = abs(distance(wPos, closestPos));
     bool red = false;

@@ -52,21 +52,12 @@ public class sleepTimer : MonoBehaviour
                 startedBlink = false;
             }
         }
-        if (enableSleepText && Time.time - timeSinceEnabledSleepText >= 37)
-        {
-            LoadBackToTrail.Load();
-        }
-        else if (enableSleepText && Time.time - timeSinceEnabledSleepText >= 17)
-        {
-            sleepText.interactable = false;
-            gameOverText.interactable = false;
-        }
-        else if (enableSleepText && Time.time - timeSinceEnabledSleepText >= 7)
+
+        if(enableSleepText && Time.time - timeSinceEnabledSleepText >= 2)
         {
             sleepText.interactable = true;
             gameOverText.interactable = true;
         }
-        
     }
 
     public void blink()
