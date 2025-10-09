@@ -22,7 +22,7 @@ void CreateTexture(uint3 id : SV_DispatchThreadID)
     float lerpVal = abs(pos.x + (round(snoise(pos * float2(30, 7))* 10)/10 * 0.02) - 0.5) * 10;
     float shad = round(lerp(0, 1, lerpVal) * 5)/5;
 
-    float3 barkColor = float3(0.141, 0.133, 0.125) * (inPoly - shad);
+    float3 barkColor = (inPoly - shad);
    
     treeText[id.xy] = float4(barkColor, 1);
 }

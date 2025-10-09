@@ -32,8 +32,6 @@ struct usedUV
 	float2 uvPos;
 	float3 worldLoc;
 	float3 normal;
-    float3 binormal;
-    float3 tangent;
 	int used;
 	float lit;
 };
@@ -61,8 +59,6 @@ float hash11(float p)
 [numthreads(15,15,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-   
-	
 	//Result[id.xy] = float4(0.01, 0.01, 0., 1); //ambient light
 	float a;
 	float b;
@@ -87,41 +83,24 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			float3 wp3 = triangles[i].p3WPos;
 
 			usedUVs[texRes * id.y + id.x].worldLoc = a * wp1 + b * wp2 + c * wp3;
-            
-            usedUVs[texRes * id.y + id.x].normal = triangles[i].normal;
-            usedUVs[texRes * id.y + id.x].binormal = triangles[i].binormal;
-            usedUVs[texRes * id.y + id.x].tangent = triangles[i].tangent;
+			nm[id.xy].g = 1 - nm[id.xy].g;
+			nm[id.xy] = nm[id.xy] *  2 - 1;
+			usedUVs[texRes * id.y + id.x].normal = triangles[i].normal * nm[id.xy].b + triangles[i].binormal * nm[id.xy].g + triangles[i].tangent* nm[id.xy].r;// 
+			usedUVs[texRes * id.y + id.x].normal = normalize(usedUVs[texRes * id.y + id.x].normal);
 			break;
 		}
 	}
 }
-int colCount;
-float4 ambient;
-float lightContrast;
-float lightFallOff;
+
 [numthreads(15,15,1)]
 void DynamicLight(uint3 id : SV_DispatchThreadID)
 {
-	//float4 amb = float4(0.3/1.5, 0.15/1.5, 0.15/1.5, 1);
-	//float4 amb = 
-    Result[id.xy] = ambient; //ambient light
+	float4 amb = float4(0.3/1.5, 0.15/1.5, 0.15/1.5, 1);
+	Result[id.xy] = amb; //ambient light
 	float4 lightCol = 0;
 	usedUVs[texRes * id.y + id.x].lit = 1;
-    
-	
 	if (usedUVs[texRes * id.y + id.x].used == 1)
 	{
-        //nm[id.xy] -= 0.01;
-        float3 nMap = nm[id.xy];
-        nMap.g = 1 - nMap.g;
-        nMap = nMap * 2 - 1;
-        float3 nAndNm; //normal and normalMap
-        float3 n = usedUVs[texRes * id.y + id.x].normal;
-        float3 bn = usedUVs[texRes * id.y + id.x].binormal;
-        float3 t = usedUVs[texRes * id.y + id.x].tangent;
-        nAndNm = n * nMap.b + bn * nMap.g + t * nMap.r;
-        nAndNm = normalize(nAndNm);
-        //nAndNm = usedUVs[texRes * id.y + id.x].normal;
 		for (int i = 0; i < numLights; i++)
 		{
 			float3 lightLoc = lights[i].loc;
@@ -129,30 +108,24 @@ void DynamicLight(uint3 id : SV_DispatchThreadID)
 			float dist = length(lightMinusLoc);
 			float maxDist = lights[i].range;
 			float4 col = normalize(lights[i].color) * lights[i].intensity;
-            float3 lightVec = normalize(lightMinusLoc) /** (hash11((id.x) * (id.y)) * 0.2 + 0.9)*/;
-            
+			float3 lightVec = normalize(lightMinusLoc)* (hash11((id.x ) * (id.y)) * 0.2 + 0.9);
 			
-			
-            float angleBetweenLightAndLoc = dot(lightVec, nAndNm);
+			float angleBetweenLightAndLoc = dot(lightVec, usedUVs[texRes * id.y + id.x].normal) ;
 
 			if (dist < maxDist && angleBetweenLightAndLoc > 0)
 			{
 				//lightCol = col *angleBetweenLightAndLoc;
-				float4 val = (1 - dist / maxDist) * angleBetweenLightAndLoc;
-                val = round(val * colCount) / colCount;
-                float4 lerpVal = pow(val, lightFallOff);
-                lerpVal = ((lerpVal - 0.5) * lightContrast + 0.5);
-                lightCol = lerp(lightCol, col, lerpVal * usedUVs[texRes * id.y + id.x].lit);
-            }
+				float4 val = (1 - dist / maxDist) * - 1 * angleBetweenLightAndLoc;
+				val = round(val * 7)/7;
+				lightCol = lerp(lightCol, col, val * val * usedUVs[texRes * id.y + id.x].lit);
+			}
 		}
 		Result[id.xy] += lightCol;
 	}
 }
 
-
 [numthreads(8,8,1)]
 void rayTracedLight(uint3 id : SV_DispatchThreadID)
 {
-    
 
 }
