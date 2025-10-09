@@ -181,7 +181,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: b0067a0c9d18cbf4f8e4d79e421cbb7b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a4958f868fe449746ace392a0f8c896a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -189,7 +189,7 @@ SpriteRenderer:
   m_Size: {x: 2.85, y: 1.35}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &29804324
@@ -1139,7 +1139,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 8be1a060b721ed747ae4f02eec5cb5cc, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: ecd87c94d5ad3f94dbd459bee8afc87b, type: 2}
+      objectReference: {fileID: 2100000, guid: 21845e4b90b54de43bd2951fce8f201c, type: 2}
     - target: {fileID: 919132149155446097, guid: 8be1a060b721ed747ae4f02eec5cb5cc, type: 3}
       propertyPath: m_Name
       value: hill
