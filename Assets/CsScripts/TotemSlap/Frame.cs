@@ -111,7 +111,7 @@ public class Frame : MonoBehaviour
 
         if(GameVars.shapeInd >= tmpCell.GetLength(0))
         {
-            LoadBackToTrail.Load();
+            LoadBackToTrail.Load("Rifin");
         }
 
         for (int i = 0; i < tmpCell.GetLength(1); i++)

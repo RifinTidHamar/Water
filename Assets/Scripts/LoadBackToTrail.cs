@@ -5,10 +5,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public static class LoadBackToTrail
-{    public static void Load()
+{    
+    public static void Load(string scene)
     {
-        SceneManager.LoadScene("Rifin", LoadSceneMode.Single);
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
         DialogueManager.SetDialoguePanel(true);
-
     }
 }

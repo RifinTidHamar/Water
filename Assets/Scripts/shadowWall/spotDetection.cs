@@ -33,7 +33,7 @@ public class spotDetection : MonoBehaviour
         if (GlobVars.reps == 6)
         {
             //complete
-            LoadBackToTrail.Load();
+            LoadBackToTrail.Load("RifinCave");
         }
     }
     void OnMouseExit()

@@ -4141,7 +4141,7 @@ GameObject:
   - component: {fileID: 2064605524}
   - component: {fileID: 2064605522}
   m_Layer: 0
-  m_Name: shooting stars
+  m_Name: shooting_stars
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

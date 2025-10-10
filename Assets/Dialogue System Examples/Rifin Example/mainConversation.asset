@@ -4807,7 +4807,7 @@ MonoBehaviour:
       - originConversationID: 1
         originDialogueID: 113
         destinationConversationID: 1
-        destinationDialogueID: 116
+        destinationDialogueID: 180
         isConnector: 0
         priority: 2
       conditionsString: 
@@ -5005,8 +5005,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 2425.6558
-        y: 2874.4285
+        x: 2401.4355
+        y: 2873.6946
         width: 160
         height: 30
     - id: 118
@@ -8331,9 +8331,63 @@ MonoBehaviour:
         y: 681.94946
         width: 160
         height: 30
+    - id: 180
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Description
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Actor
+        value: 1
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 2
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Dialogue Text
+        value: Let's take a look
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Sequence
+        value: 'SetActive(Response Menu Panel, false);
+
+          Delay(0.5);
+
+          SetActive(Response
+          Menu Panel, true);'
+        type: 0
+        typeString: CustomFieldType_Text
+      conversationID: 1
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks: []
+      conditionsString: 
+      userScript: "Load(\"TestScene\")\r"
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 2617.7175
+        y: 2869.5576
+        width: 160
+        height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 2079.3533, y: 2671.543}
-    canvasZoom: 0.90999955
+    canvasScrollPosition: {x: 2255.1484, y: 2653.4106}
+    canvasZoom: 1.0899994
   - id: 3
     fields:
     - title: Title
@@ -8872,8 +8926,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.9400002
+    canvasScrollPosition: {x: 277.12003, y: 165.66957}
+    canvasZoom: 0.46674973
   - id: 4
     fields:
     - title: Title
@@ -12943,7 +12997,7 @@ MonoBehaviour:
       - originConversationID: 4
         originDialogueID: 79
         destinationConversationID: 4
-        destinationDialogueID: 80
+        destinationDialogueID: 167
         isConnector: 0
         priority: 2
       conditionsString: 
@@ -17844,9 +17898,63 @@ MonoBehaviour:
         y: 1279.7975
         width: 160
         height: 30
+    - id: 167
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: 
+      - title: Description
+        value: 
+        type: 0
+        typeString: 
+      - title: Actor
+        value: 1
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 2
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Dialogue Text
+        value: Take a look
+        type: 0
+        typeString: 
+      - title: Sequence
+        value: 'SetActive(Response Menu Panel, false);
+
+          Delay(0.5);
+
+          SetActive(Response
+          Menu Panel, true);'
+        type: 0
+        typeString: 
+      conversationID: 4
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks: []
+      conditionsString: 
+      userScript: "Load(\"TestScene\")\r"
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 272.31232
+        y: 2562.6262
+        width: 160
+        height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 73.68345, y: 2239.5645}
-    canvasZoom: 0.75999975
+    canvasScrollPosition: {x: 52.73772, y: 2374.1155}
+    canvasZoom: 0.93999964
   - id: 6
     fields:
     - title: Title
@@ -21881,7 +21989,7 @@ MonoBehaviour:
       - originConversationID: 6
         originDialogueID: 84
         destinationConversationID: 6
-        destinationDialogueID: 141
+        destinationDialogueID: 142
         isConnector: 0
         priority: 2
       conditionsString: 
@@ -21892,7 +22000,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 72.85715
-        y: 2306.2793
+        y: 2305.5247
         width: 160
         height: 30
     - id: 85
@@ -24505,13 +24613,62 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 71.36459
-        y: 2390.9636
+        x: 60.79857
+        y: 2403.7937
+        width: 160
+        height: 30
+    - id: 142
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: 
+      - title: Description
+        value: 
+        type: 0
+        typeString: 
+      - title: Actor
+        value: 2
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 1
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Dialogue Text
+        value: A clearing is up ahead. I see an extinguished fire pit. Let's sit.
+        type: 0
+        typeString: 
+      - title: Sequence
+        value: Delay(0.2);
+        type: 0
+        typeString: 
+      conversationID: 6
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks: []
+      conditionsString: 
+      userScript: "Load(\"TestScene\")\r"
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 241.81642
+        y: 2388.9148
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 1995.6538}
-    canvasZoom: 0.72999984
+    canvasScrollPosition: {x: 28.986122, y: 2241.3672}
+    canvasZoom: 1.0599996
   - id: 7
     fields:
     - title: Title
@@ -28266,7 +28423,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 2264
-        y: 3326
+        y: 3324.0488
         width: 160
         height: 30
     - id: 186
@@ -35941,8 +36098,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 483.2024
-        y: 6049.814
+        x: 418.87262
+        y: 6068.7827
         width: 160
         height: 30
     - id: 322
@@ -36343,7 +36500,7 @@ MonoBehaviour:
       - originConversationID: 7
         originDialogueID: 329
         destinationConversationID: 7
-        destinationDialogueID: 321
+        destinationDialogueID: 330
         isConnector: 0
         priority: 2
       conditionsString: 
@@ -36354,12 +36511,61 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 483.65265
-        y: 5988.521
+        y: 5987.6963
+        width: 160
+        height: 30
+    - id: 330
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: 
+      - title: Description
+        value: 
+        type: 0
+        typeString: 
+      - title: Actor
+        value: 2
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 1
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Dialogue Text
+        value: 
+        type: 0
+        typeString: 
+      - title: Sequence
+        value: Delay(0.2);
+        type: 0
+        typeString: 
+      conversationID: 7
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks: []
+      conditionsString: 
+      userScript: "Load(\"ShadowWall\")\r"
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 611.11456
+        y: 6065.6855
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 290.31046, y: 5603.4995}
-    canvasZoom: 0.72999984
+    canvasScrollPosition: {x: 2055.2593, y: 3093.0745}
+    canvasZoom: 0.8199997
   - id: 8
     fields:
     - title: Title
@@ -36488,7 +36694,12 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Sequence
-        value: 
+        value: 'SetActive(tag=trail, false);
+
+          SetActive(shooting_stars,
+          false);
+
+          SetActive(trail_walk, true);'
         type: 0
         typeString: 
       conversationID: 8
@@ -36513,7 +36724,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 2368
-        y: 134
+        y: 131.97467
         width: 160
         height: 30
     - id: 2
@@ -37147,8 +37358,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 288
-        y: 1562
+        x: 363.78952
+        y: 1305.1578
         width: 160
         height: 30
     - id: 16
@@ -40267,8 +40478,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 1
-        y: 1088.2858
+        x: 1.9411774
+        y: 1089.0625
         width: 160
         height: 30
     - id: 72
@@ -44930,7 +45141,7 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: I think it's time to up those stairs now
+        value: I think it's time to go up those stairs now
         type: 0
         typeString: 
       - title: Sequence
@@ -45324,8 +45535,8 @@ MonoBehaviour:
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 1120.7003, y: 2345.3066}
-    canvasZoom: 0.36999992
+    canvasScrollPosition: {x: 2109.6658, y: 37.186993}
+    canvasZoom: 0.78999966
   syncInfo:
     syncActors: 0
     syncItems: 0

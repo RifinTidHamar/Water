@@ -24,7 +24,7 @@ public class logDetection : MonoBehaviour
                     if (timeAfterFalling > 2)
                     {
                         timeAfterFalling = 0;
-                        LoadBackToTrail.Load();
+                        LoadBackToTrail.Load("Rifin");
                     }
                 }
             }
