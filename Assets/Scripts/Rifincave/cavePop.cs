@@ -130,7 +130,7 @@ public class cavePop : MonoBehaviour
             dur = sAnim.Duration;
             dur -= oldDur;
             oldDur += dur;
-            yield return new WaitForSeconds(dur - 0.05f);
+            yield return new WaitForSeconds(dur - 0.2f);
 
             GameObject lastCave = (GameObject)caveArr[caveI];
             cave.PathPoint[] lastPath = lastCave.GetComponent<cave>().getPath();

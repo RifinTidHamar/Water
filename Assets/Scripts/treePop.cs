@@ -69,7 +69,7 @@ public class treePop : MonoBehaviour
         Renderer rend = curTree.GetComponent<Renderer>();
         //rend.material = new Material(Resources.Load<Shader>("Shaders/transparentColor"));
 
-        Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - Mathf.Pow(zDispCurve, colPow));// 1 - Mathf.Pow(zDisplacement, 5));
+        Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - ((zDispCurve - 0.5f) * colPow + 0.5f));// 1 - Mathf.Pow(zDisplacement, 5));
         rend.material.SetColor("_Color", newCol);
         curTree.GetComponent<TreeGeneration>().initBark();
     }
@@ -105,7 +105,7 @@ public class treePop : MonoBehaviour
             Renderer rend = curTree.GetComponent<Renderer>();
             rend.material = new Material(Resources.Load<Shader>("Shaders/transparentColor"));
 
-            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - Mathf.Pow(zDispCurve, colPow));// 1 - Mathf.Pow(zDisplacement, 5));
+            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - ((zDispCurve - 0.5f) * colPow + 0.5f));// 1 - Mathf.Pow(zDisplacement, 5));
             rend.material.SetColor("_Color", newCol);
             curTree.GetComponent<TreeGeneration>().initBark();
             //Debug.Log("loaded");
@@ -149,9 +149,8 @@ public class treePop : MonoBehaviour
             curTree = curTree.transform.GetChild(0).gameObject;
             Renderer rend = curTree.GetComponent<Renderer>();
 
-            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - Mathf.Pow(zDispCurve, colPow));// 1 - Mathf.Pow(zDisplacement, 5));
+            Vector4 newCol = Vector4.Lerp(LightEffectCol, darkCol, darkStart - ((zDispCurve - 0.5f) * colPow + 0.5f));// 1 - Mathf.Pow(zDisplacement, 5));
             rend.material.SetColor("_Color", newCol);
-            
         }
     }
 }

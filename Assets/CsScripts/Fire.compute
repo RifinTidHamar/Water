@@ -21,16 +21,20 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 {
     float2 pos = float2((((float2) id.xy) / (float)texRes) - 0.5);
     float zPos = (float)id.z / (float)planes;
-    float noise = snoise(float3(pos * fireStretch[id.z].stretch - float2(0, dt * 4), dt / 4 + id.z * 100)*1.3);
+    float noise = snoise(float3(pos * fireStretch[id.z].stretch - float2(0, dt * 4.5), dt / 2 + id.z * 100)*1.3);
+    float smallNoise = (noise) * 0.5 * (pos.y + 0.5);
+    smallNoise = clamp(smallNoise,0, 0.1);
     //float noise = snoise(float3(pos.xy * 2.5f, id.z));//snoise(float3(pos * fireStretch[id.z].stretch, id.z));
     //noise += step(-0.5, pos.y) * step(pos.y, -0.3);
+    //noise = 1;
     noise += 1 - ((float)id.y / (float)texRes - 0.2) * 2;
     //noise *= smoothstep(-0.5, -0.3, pos.y);
     //noise *= 1 - smoothstep(0.3, 0.5, pos.y);
-    noise *= smoothstep(-0.2, -0.1, pos.x);
-    noise *= 1 - smoothstep(0.1, 0.2, pos.x);
+    noise *= smoothstep(-0.2 - smallNoise, -0.1 - smallNoise, pos.x);
+    noise *= 1 - smoothstep(0.1 + smallNoise, 0.2 + smallNoise, pos.x);
+    //noise -= 0.5;
     int colCount = 3.5;
-    noise = round(noise * (float) (colCount - 0.5)) / (float) colCount;
+    noise = round(noise * (float) (colCount - 1)) / (float) colCount;
      //noise = clamp(noise, 0.3, 1);
     //noise -= 0.5;
     Result[float3(id.xyz)] = noise;

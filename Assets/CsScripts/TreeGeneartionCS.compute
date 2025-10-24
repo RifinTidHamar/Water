@@ -101,7 +101,8 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     float inPoly = inPolygon(pos, treeObj[0].bark1);
     inPoly += inPolygon(pos, treeObj[0].bark2);
     float solidInPoly = inPoly;
-    float noiseOfset = hash11(treeObj[0].bark1.bl) * 1000;
+    float noiseOfset = hash11(treeObj[0].bark1.bl.x) * 1000;
+    //float noiseOfset = hash11(treeObj[0].bark1.bl) * 1000;
     //bark color noise
     inPoly -= inPoly * round(snoise(pos * float2(25, 5) + noiseOfset) * 0.5 + 0.7) * 0.2;
     
@@ -111,7 +112,7 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     float shad = round(lerp(0, 1, lerpVal) * 5) / 5;
     shad *= 0.5;
     solidInPoly = clamp(solidInPoly, 0, 1);
-    float3 barkColor = (float3(0.439, 0.345, 0.361) + (hash11(treeObj[0].id) * 0.02)) * (inPoly - shad);
+    float3 barkColor = (float3(0.263, 0.263, 0.29) + (hash11(treeObj[0].id) * 0.03)) * (inPoly - shad);
     float4 bark = float4(barkColor, 1) * solidInPoly;
     
     float noise = snoise(pos * float2(10, 10) + noiseOfset) * 0.5 + 0.5;
@@ -128,8 +129,8 @@ void barkDraw(uint3 id : SV_DispatchThreadID)
     float grassNoise = lowerN + upperN + rightN + leftN;
     grassNoise = round(grassNoise);
     grassNoise = clamp(grassNoise, 0, 1);
-    float grassColAdd = round(hash11(treeObj[0].id) * 2) / 2 * 0.03 * (1 - grassNoise);// round(snoise(pos * float2(40, 400)) * 2) / 2 * 0.03 * (1 - grassNoise);
-    float4 grassCol = float4(0.349, 0.569, 0.18, 1) * (1 - grassNoise) + grassColAdd;
+    float grassColAdd = round(hash11(treeObj[0].id) * 2) / 2 * 0.04 * (1 - grassNoise);// round(snoise(pos * float2(40, 400)) * 2) / 2 * 0.03 * (1 - grassNoise);
+    float4 grassCol = float4(0.165, 0.259, 0.239, 1) * (1 - grassNoise) + grassColAdd;
     //grassNoise *= 1 - pos.y;
     bark *= grassNoise * round((1 - lowerN));
     bark += grassCol;
@@ -160,7 +161,7 @@ void leafDraw(uint3 id : SV_DispatchThreadID)
         inTri -= inTri * /*(round(snoise(pos * float2(5, 9) + noiseOfset)) * 0.5 + 0.5)*/hash11(i) * 0.2;
 
         //float inTri = inPolygon(pos, leafObjs[id.z].leafy);
-        float3 leafColor = float3(0.302, 0.48, 0.286) * inTri;
+        float3 leafColor = float3(0.153, 0.227, 0.361) * inTri;
         float4 leaves = float4(leafColor, 1) * solidInTri;
 
         leaves.xyz *= 1 - pos.y;
