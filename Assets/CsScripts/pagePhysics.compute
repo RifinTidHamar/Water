@@ -1,0 +1,159 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel calcVel
+#pragma kernel mouseMove
+#pragma kernel vertFollow
+
+struct Vertex
+{
+    float3 pos;
+    float3 norm;
+    float2 uv;
+};
+
+struct Line
+{
+    float3 curParPos;
+    float3 prevPos;
+    float3 curPos;
+    float3 norm;
+    float3 parNorm;
+    int v1Ind;
+    int v2Ind;
+    float3 vel;
+};
+
+RWStructuredBuffer<Vertex> verts;
+RWStructuredBuffer<Line> pLines;
+
+int la; //left arrow
+int ra; //right arrow
+int ua; //up arrow
+int da; //down arrow
+
+float wght;
+float flex;
+float grvty;
+
+float dt;
+
+float4 rHand;
+float4 rHandVel;
+float4 lHand;
+
+static float PI = 3.14159265359;
+
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    p = frac(p);
+        //p -= 0.5;
+    return p;
+}
+
+[numthreads(16,1,1)]
+void calcVel(uint3 id : SV_DispatchThreadID)
+{
+    Line l1 = pLines[id.x];
+
+    if(id.x != 0)
+    {
+        float3 pr = l1.curParPos - l1.curPos; //parent relation?
+        //float rand = hash11(dt) * 0.1;
+        float3 gVel = float3(0, -grvty, 0); //gravity
+        //l1.vel += (l1.curPos - l1.prevPos) * wght;
+        //float3 cVel = gVel; //(cross(pr, l1.vel)/* / abs(pr) * abs(pr)*/) + gVel; //current velocity?
+        ////l1.vel += gVel;
+        //l1.vel *= 0.998; //this might be weight
+        //l1.curPos += (cVel /*+ gVel*/) * dt;
+        l1.curPos += gVel * dt;
+    }
+    
+    pLines[id.x] = l1;
+
+    verts[l1.v1Ind].pos.yz = l1.curPos.yz;
+    verts[l1.v2Ind].pos.yz = l1.curPos.yz;
+    verts[l1.v1Ind + 32].pos.yz = l1.curPos.yz - float2(0, 0.0001);//the other side of the paper
+    verts[l1.v2Ind + 32].pos.yz = l1.curPos.yz - float2(0, 0.0001);//the other side of the paper
+
+    //im very sure this is wrong
+    verts[l1.v1Ind].norm = l1.norm;
+    verts[l1.v2Ind].norm = l1.norm;
+    verts[l1.v1Ind + 32].norm = -l1.norm;
+    verts[l1.v2Ind + 32].norm = -l1.norm;
+}
+
+[numthreads (16,1,1)]
+void mouseMove(uint id : SV_DispatchThreadID)
+{
+    Line l1 = pLines[id.x];
+    
+    if (id.x != 0)
+    {
+        if (distance(l1.curPos.yz, lHand.yz) < 0.005)
+        {
+            l1.curPos.yz += normalize(l1.curPos.yz - lHand.yz) * 0.0003;
+        }
+    }
+    
+    pLines[id.x] = l1;
+}
+
+[numthreads(16, 1, 1)]
+void vertFollow(uint id : SV_DispatchThreadID)
+{
+    Line l1 = pLines[id.x];
+    l1.prevPos = l1.curPos;
+    float3 vel = float3(0, 0, 0);
+    
+    if (id.x == 0 /*&& distance(l1.curPos, float3(0, 0.01, 0)) < 0.00001*/)
+    {
+        //vel.z += (la + -ra) * 32 * dt;
+        //vel.y += (ua + -da) * 32 * dt;
+        l1.curPos = rHand;
+    }
+
+    else
+    {
+        if (id.x != 15)
+        {
+            float3 chPos = pLines[id.x + 1].curPos;
+            float chDist = distance(l1.curPos, chPos);
+            float3 chR = l1.curPos - chPos;
+            l1.curPos = chPos + (normalize(chR) * 0.0025);
+        }
+        l1.curParPos = pLines[id.x - 1].curPos;
+
+        float pDist = distance(l1.curParPos, l1.curPos);        
+        float3 pR = l1.curPos - l1.curParPos;
+        l1.curPos = l1.curParPos + (normalize(pR) * 0.0025); //sign(0.0025 - pDist);// * 10 * dt; // * dEffect * dt;
+        //vel += normalize(pR) * sign(0.0025 - pDist) * 20 * 2 * dt; // * dEffect * dt;
+
+        if (id.x > 1)
+        {
+            float3 granParPos = pLines[id.x - 2].curPos;
+            float3 curToPar = normalize(l1.curPos - l1.curParPos);
+            float3 parToGpar = normalize(l1.curParPos - granParPos);
+            float curToGparAngle = acos(dot(curToPar.yz, parToGpar.yz));
+            
+            float lerpVal = clamp(curToGparAngle - flex, 0, 1); //0 -> (1 - flex)
+            lerpVal *= 1 / flex; //0 -> flex = 0 -> 1;
+            float3 curToGparDir = normalize(l1.curPos - granParPos);
+            l1.curPos += dt * curToGparDir * lerpVal * 40;
+            
+            ////The angle to rotate cur to keep it at flex degrees to Gpar
+            //float deltaAngle = flex - curToGparAngle;
+            //float3 rotVec = float3(0, cos(deltaAngle), sin(deltaAngle));
+            ////if the flex angle is greater then the angle from cur to Gpar, then 0
+            //float outsideFlex = step(curToGparAngle, flex);
+            ////if positive, then cur to gPar angle goes left, if negative, right
+            //int rotDir = -sign(curToPar.y * parToGpar.z - curToPar.z * parToGpar.y);
+            //l1.curPos.yz += dt * 40 * rotVec * outsideFlex * rotDir;
+        }
+        
+    }
+    l1.curPos += vel;
+    pLines[id.x] = l1;
+}
