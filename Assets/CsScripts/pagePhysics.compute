@@ -34,7 +34,7 @@ float wght;
 float flex;
 float grvty;
 
-float dt;
+float dtpage;
 
 float4 rHand;
 float4 rHandVel;
@@ -68,7 +68,7 @@ void calcVel(uint3 id : SV_DispatchThreadID)
         ////l1.vel += gVel;
         //l1.vel *= 0.998; //this might be weight
         //l1.curPos += (cVel /*+ gVel*/) * dt;
-        l1.curPos += gVel * dt;
+        l1.curPos += gVel * dtpage;
     }
     
     pLines[id.x] = l1;
@@ -112,7 +112,7 @@ void vertFollow(uint id : SV_DispatchThreadID)
     {
         //vel.z += (la + -ra) * 32 * dt;
         //vel.y += (ua + -da) * 32 * dt;
-        l1.curPos = rHand;
+        l1.curPos = rHand.xyz;
     }
 
     else
@@ -141,7 +141,7 @@ void vertFollow(uint id : SV_DispatchThreadID)
             float lerpVal = clamp(curToGparAngle - flex, 0, 1); //0 -> (1 - flex)
             lerpVal *= 1 / flex; //0 -> flex = 0 -> 1;
             float3 curToGparDir = normalize(l1.curPos - granParPos);
-            l1.curPos += dt * curToGparDir * lerpVal * 40;
+            l1.curPos += dtpage * curToGparDir * lerpVal * 40;
             
             ////The angle to rotate cur to keep it at flex degrees to Gpar
             //float deltaAngle = flex - curToGparAngle;

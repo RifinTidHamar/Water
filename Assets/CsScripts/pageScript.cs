@@ -90,7 +90,8 @@ public class pageScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-       
+
+        Debug.Log(SystemInfo.graphicsDeviceType);
 
         //remove
         Application.targetFrameRate = 120;
@@ -172,7 +173,7 @@ public class pageScript : MonoBehaviour
         weightID = Shader.PropertyToID("wght");
         flexID = Shader.PropertyToID("flex");
 
-        dtID = Shader.PropertyToID("dt");
+        dtID = Shader.PropertyToID("dtpage");
 
         rightHandID = Shader.PropertyToID("rHand");
         leftHandID = Shader.PropertyToID("lHand");
@@ -219,11 +220,12 @@ public class pageScript : MonoBehaviour
         RaycastHit hitData;
         Physics.Raycast(ray, out hitData, 1000);
         tempRHand = meshTransform.InverseTransformPoint(hitData.point);
+        Debug.Log(hitData.collider.name);
 
         comp.SetVector(rightHandID, tempRHand);
         comp.SetVector(leftHandID, tempLHand);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 7; i++)
         {
             comp.Dispatch(vertKernelID, 1, 1, 1);
 

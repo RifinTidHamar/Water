@@ -1,86 +1,68 @@
-Shader "Custom/PageMaterial"
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/PageMaterial_Vulkan"
 {
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
-        Tags { "Queue" = "Transparent" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" }
         LOD 200
-        //Cull Off
-        CGPROGRAM
-        // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard addshadow fullforwardshadows  vertex:vert
 
-        // Use shader model 3.0 target, to get nicer looking lighting
-        #pragma target 5.0
-
-        
-
-        struct appdata
+        Pass
         {
-            float4 vertex : SV_POSITION;
-            float3 normal : NORMAL;
-            float2 texcoord : TEXCOORD0;
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma target 5.0
 
-            uint id : SV_VertexID;
-            uint inst : SV_InstanceID;
-        };
+            struct Vertex
+            {
+                float3 pos;
+                float3 norm;
+                float2 uv;
+            };
 
-        sampler2D _MainTex;
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float3 normal : NORMAL;
+                float2 texcoord : TEXCOORD0;
 
-        struct Input
-        {
-            float2 uv_MainTex;
-        };
+                uint id : SV_VertexID;
+                uint inst : SV_InstanceID;            
+            };
 
-        half _Glossiness;
-        half _Metallic;
-        fixed4 _Color;
+            struct v2f
+            {
+                float4 pos : SV_POSITION;
+                float2 uv  : TEXCOORD0;
+            };
 
-         struct Vertex
-        {
-            float3 pos;
-            float3 norm;
-            float2 uv;
-        };
-        #ifdef SHADER_API_D3D11            
-            StructuredBuffer<Vertex> verts;
-        #endif
+            sampler2D _MainTex;
+            float4 _Color;
 
-        // // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-        // // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-        // // #pragma instancing_options assumeuniformscaling
-        // UNITY_INSTANCING_BUFFER_START(Props)
-        //     // put more per-instance properties here
-        // UNITY_INSTANCING_BUFFER_END(Props)
+            #if defined(SHADER_API_D3D11) || defined(SHADER_API_D3D12) || defined(SHADER_API_VULKAN)
+                StructuredBuffer<Vertex> verts;
+            #endif
 
-       
+            v2f vert(appdata v)
+            {
+                v2f o;
+                Vertex data = verts[v.id];
+                o.pos = UnityObjectToClipPos(float4(data.pos,1));
+                o.uv = data.uv;
+                return o;
+            }
 
-        void vert (inout appdata v)
-        {
-        #ifdef SHADER_API_D3D11                
-            v.vertex = float4(verts[v.id].pos, 0);
-            v.normal = float4(verts[v.id].pos, 1);
-            v.texcoord = verts[v.id].uv;
-        #endif
+            float4 frag(v2f i) : SV_Target
+            {
+                return tex2D(_MainTex, i.uv) * _Color;
+            }
+            ENDCG
         }
-
-        void surf (Input IN, inout SurfaceOutputStandard o)
-        {
-            // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = c.rgb;
-            // Metallic and smoothness come from slider variables
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
-            o.Alpha = c.a;
-        }
-        ENDCG
     }
-    FallBack "Diffuse"
 }
