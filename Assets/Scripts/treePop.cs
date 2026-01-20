@@ -27,6 +27,10 @@ public class treePop : MonoBehaviour
     [SerializeField]
     float power = 2;
 
+    [SerializeField]
+    [Range(0,1)]
+    float powerFactor; 
+
     public Transform leftBound;
     public Transform rightBound;
     public Transform backBound;
@@ -60,8 +64,11 @@ public class treePop : MonoBehaviour
         curTree.transform.position = new Vector3(xDisplacement, lb.y + 4f, zDisplacement);
         //GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("prefab/treeOrigin"), , Quaternion.identity) as GameObject;
         //treeArr.Add(curTree);
+        //zDisplacement -= lb.z;
+        //zDisplacement /= bb.z;
         zDisplacement -= lb.z;
-        zDisplacement /= bb.z;
+        zDisplacement /= bb.z - lb.z;
+        zDisplacement *= powerFactor;
         float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
         curTree.transform.localScale = Vector3.one;
         curTree.transform.localScale *= Mathf.Lerp(minS, maxS, zDispCurve);
@@ -84,12 +91,12 @@ public class treePop : MonoBehaviour
 
         for (int i = 0; i < treeCount; i++)
         {
-            float zDisplacement = Random.Range(lb.z, bb.z);
-            int leftOrRight = Random.Range(0, 2);
+            float zDisplacement =  Random.Range(lb.z, bb.z);
+            int leftOrRight =  Random.Range(0, 2);
             float xDisplacement;
             if (leftOrRight == 0)
             {
-                xDisplacement = Random.Range(lb.x, ((rb.x - lb.x) * 0.46f) + lb.x);
+                xDisplacement =  Random.Range(lb.x, ((rb.x - lb.x) * 0.46f) + lb.x);
             }
             else
             {
@@ -97,8 +104,11 @@ public class treePop : MonoBehaviour
             }
             GameObject curTree = GameObject.Instantiate(Resources.Load<GameObject>("prefab/treeOrigin"), new Vector3(xDisplacement, lb.y + 4f, zDisplacement), Quaternion.identity) as GameObject;
             treeArr.Add(curTree);
+            //zDisplacement -= lb.z;
+            //zDisplacement /= bb.z;
             zDisplacement -= lb.z;
-            zDisplacement /= bb.z;
+            zDisplacement /= bb.z - lb.z;
+            zDisplacement *= powerFactor;
             float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
             curTree.transform.localScale *= Mathf.Lerp(minS, maxS, zDispCurve);
             curTree = curTree.transform.GetChild(0).gameObject;
@@ -125,8 +135,11 @@ public class treePop : MonoBehaviour
             float zDisplacement = curTree.transform.position.z;// + Time.deltaTime * 0.01f;
             float moveSpeed = Time.deltaTime * 0.5f;
             curTree.transform.position -= new Vector3(0, 0, moveSpeed * 0.05f);
+            //zDisplacement -= lb.z;
+            //zDisplacement /= bb.z;
             zDisplacement -= lb.z;
-            zDisplacement /= bb.z;
+            zDisplacement /= bb.z - lb.z;
+            zDisplacement *= powerFactor;
             float zDispCurve = Mathf.Pow((1 - zDisplacement), power);
             float curScale = curTree.transform.localScale.x;
             curScale += Time.deltaTime * zDispCurve;

@@ -184,6 +184,7 @@ public class TreeGeneration : MonoBehaviour
     // Start is called before the first frame update
     public void initBark()
     {
+        //Random.InitState(3);
         Renderer rend = GetComponent<Renderer>();
         mat = rend.material;
 
