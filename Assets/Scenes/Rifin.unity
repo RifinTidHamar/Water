@@ -3129,7 +3129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moving: 1
   darkStart: 0.83
-  colPow: 1.19
+  colPow: 1.46
   minS: 7
   maxS: 18
   treeCount: 200
@@ -3137,7 +3137,7 @@ MonoBehaviour:
   leftBound: {fileID: 1927571453}
   rightBound: {fileID: 313003870}
   backBound: {fileID: 401746133}
-  LightEffectCol: {r: 0.59607846, g: 0.6, b: 0.75686276, a: 1}
+  LightEffectCol: {r: 1, g: 1, b: 1, a: 1}
   darkCol: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &1485343038
 GameObject:
