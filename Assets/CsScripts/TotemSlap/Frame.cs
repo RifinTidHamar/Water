@@ -66,7 +66,7 @@ public class Frame : MonoBehaviour
     {
         GameVars.shapeInd = 0;
         GameVars.isClayDone = true;//for rotation in at start of game
-        for(int i = 0; i < 500; i++)
+        //for(int i = 0; i < 500; i++)
             init();
     }
 
